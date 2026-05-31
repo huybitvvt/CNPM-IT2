@@ -22,7 +22,7 @@ function saveHistory(messages) {
 
 function AiChatbot() {
   const currentUser = authService.getCurrentUser();
-  const isAuthenticated = Boolean(currentUser.token);
+  const isAuthenticated = Boolean(currentUser.token || currentUser.email || currentUser.role);
   const [isOpen, setIsOpen] = useState(false);
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
@@ -84,7 +84,7 @@ function AiChatbot() {
   };
 
   return (
-    <div className="fixed bottom-5 right-5 z-[1200]">
+    <div className="fixed bottom-6 right-6 z-[9999]">
       {isOpen && (
         <section className="mb-4 flex h-[min(620px,calc(100vh-7rem))] w-[min(420px,calc(100vw-2rem))] flex-col overflow-hidden rounded-2xl border border-[#cfe1d8] bg-white shadow-2xl">
           <header className="flex items-center justify-between border-b border-[#e2eee8] bg-[#10201c] px-4 py-3 text-white">
@@ -201,7 +201,8 @@ function AiChatbot() {
         <button
           type="button"
           onClick={openChat}
-          className="group relative flex items-center gap-3 rounded-2xl bg-gradient-to-r from-emerald-500 to-teal-500 px-5 py-4 text-sm font-black text-white shadow-glow-emerald transition hover:-translate-y-0.5"
+          className="group relative flex items-center gap-3 rounded-full border-2 border-white bg-[#10201c] px-5 py-4 text-sm font-black text-white shadow-[0_18px_45px_rgba(16,32,28,0.35)] transition hover:-translate-y-0.5 hover:bg-[#18352e]"
+          title="Mở trợ lý AI"
         >
           {/* pulse notification ring */}
           <span className="absolute -right-1 -top-1 flex h-4 w-4">
@@ -210,11 +211,11 @@ function AiChatbot() {
               1
             </span>
           </span>
-          <span className="relative flex h-9 w-9 items-center justify-center rounded-xl bg-white/20 text-white">
-            <span className="absolute inline-flex h-full w-full animate-pulse-ring rounded-xl bg-white/30" />
+          <span className="relative flex h-10 w-10 items-center justify-center rounded-full bg-[#f7b733] text-[#10201c]">
+            <span className="absolute inline-flex h-full w-full animate-pulse rounded-full bg-[#f7b733]/40" />
             <MessageCircle size={20} strokeWidth={2.5} className="relative" />
           </span>
-          AI Tutor
+          Hỏi AI
         </button>
       )}
     </div>
