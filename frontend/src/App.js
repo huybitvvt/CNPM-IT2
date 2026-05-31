@@ -2,6 +2,8 @@ import './App.css';
 import {BrowserRouter , Routes , Route} from 'react-router-dom';
 import Login from './pages/auth/login';
 import Register from './pages/auth/register'
+import ForgotPassword from './pages/auth/forgotPassword';
+import ResetPassword from './pages/auth/resetPassword';
 import Course from './pages/course/course';
 import Courses from './pages/course/Courses';
 import Profile from './pages/profile/profile';
@@ -16,6 +18,7 @@ import Performance from './pages/profile/Performance';
 import certificate from './pages/assessment/certificate';
 import Forum from './pages/course/forum';
 import AdminDashboard from './pages/dashBoard/AdminDashboard';
+import AiChatbot from './Components/common/AiChatbot';
 
 function App() {
   return (
@@ -26,6 +29,8 @@ function App() {
           <Route path='/admin' Component={AdminDashboard}></Route>
           <Route path='/login' Component={Login}></Route>
           <Route path='/register' Component={Register}></Route>
+          <Route path='/forgot-password' Component={ForgotPassword}></Route>
+          <Route path='/reset-password' Component={ResetPassword}></Route>
           <Route path='/' Component={Home}></Route>
           <Route path='/courses' Component={Courses}></Route>
           <Route path='/course/:id' Component={Course}></Route>
@@ -39,6 +44,7 @@ function App() {
           <Route path='/Performance' Component={Performance} />
           <Route path='*' Component={ErrorPage}></Route>
         </Routes>
+        <AiChatbot />
       </BrowserRouter>
     </div>
   );

@@ -1,196 +1,193 @@
-# Learning Management System
+# CodePath LMS - He thong quan ly khoa hoc lap trinh truc tuyen
 
-## Overview
+CodePath LMS la website quan ly va hoc cac khoa hoc lap trinh truc tuyen. Du an duoc phat trien dua tren source LMS ma nguon mo, sau do tuy bien lai theo de tai bai tap lon mon Cong nghe phan mem: giao dien tieng Viet, nghiep vu khoa hoc lap trinh, phan quyen, dashboard, quiz, tien do hoc tap va cau hinh database Supabase PostgreSQL.
 
-This project is a Learning Management System (LMS) built with React.js for the frontend, Spring Boot for the backend, and MySQL as the database. It provides a comprehensive platform for managing online courses, user profiles, assessments, progress tracking, and more.
+## Muc tieu de tai
 
----
+- Xay dung nen tang hoc lap trinh truc tuyen co tai khoan Admin va User.
+- Cho phep Admin quan ly khoa hoc, nguoi dung va cau hoi danh gia.
+- Cho phep User dang ky khoa hoc, xem video bai hoc, theo doi tien do va lam quiz.
+- Ho tro chung chi hoan thanh sau khi dat yeu cau danh gia.
+- Ap dung quy trinh phat trien phan mem: SRS, SDD, testcase, Agile/Scrum, Git/GitHub.
 
-## Features
-
-### User Management
-- User registration and login functionality.
-- User profiles with the ability to update information.
-
-### Course Management
-- Admin can add, edit, and manage courses.
-- Course details include name, instructor, description, and more.
-
-### Assessment
-- Users can take assessments related to courses.
-- Admin can create and manage assessment questions.
-
-### Progress Tracking
-- Monitor user progress and completion status.
-- Visual representation of user progress.
-
-### Certificate Generation
-- Automatic certificate generation upon course completion.
-- Personalized certificates with user details.
-
-### Discussion Forum
-- Course-specific discussion forums for users.
-- Interaction between users and instructors.
-
-### Authentication & Security
-- JWT token-based authentication.
-- Role-based access control (**ADMIN**, **USER**).
-- Secure password encryption.
-- Default admin account for initial setup.
-- *Note: INSTRUCTOR role will be implemented soon.*
-
-### Admin Dashboard
-- Manage courses and assessment questions.
-- Track students, courses, and enrollments.
-
---- 
-
-## Technologies Used
+## Cong nghe su dung
 
 ### Frontend
-- **Core Framework:** React, React DOM, React Router  
-- **UI Components:** Ant Design, Lucide Icons, FontAwesome
-- **Styling:** Tailwind CSS  
-- **API Communication:** Axios
-- **Additional Libraries:** React Player, jsPDF, html2canvas, Moment.js, React DOM Confetti
+
+- React 18.
+- React Router.
+- Tailwind CSS.
+- Ant Design.
+- Axios.
+- React Player.
 
 ### Backend
-- **Framework:** Spring Boot  
-- **Language:** Java  
-- **Security:** Spring Security with JWT
-- **Authentication:** Role-Based Access Control
-- **Database Integration:** Spring Data JPA
-- **Architecture:** RESTful API
-- **Build Tool:** Maven
+
+- Spring Boot 3.
+- Spring Security.
+- JWT Authentication.
+- Spring Data JPA.
+- Swagger/OpenAPI.
+- Maven.
 
 ### Database
-- **MySQL**
-- **Tables:** course, learning, progress, discussion, feedback, question, user, assessment
 
----
+- Supabase PostgreSQL.
+- Hibernate auto migration qua `DDL_AUTO=update`.
+- Seed du lieu khoa hoc lap trinh mau khi database trong.
 
-## Setup
+## Chuc nang chinh
 
+### Nguoi dung
 
-### Prerequisites
-- Java 17 or higher  
-- Maven 3.6+  
-- MySQL 8.0+  
-- Node.js and npm
+- Dang ky tai khoan.
+- Dang nhap bang email va mat khau.
+- Xem danh sach khoa hoc lap trinh.
+- Tim kiem, loc va sap xep khoa hoc.
+- Loc khoa hoc theo danh muc va cap do.
+- Dang ky khoa hoc.
+- Xem video khoa hoc.
+- Theo doi tien do hoc.
+- Lam quiz sau khi hoan thanh khoa hoc.
+- Xem ket qua hoc tap va chung chi.
 
+### Admin
 
-1. Clone the repository:
+- Dang nhap bang tai khoan quan tri.
+- Xem dashboard thong ke nguoi dung, khoa hoc va luot dang ky.
+- Them, sua, xoa khoa hoc.
+- Quan ly cau hoi kiem tra cho tung khoa hoc.
+- Quan ly danh sach nguoi dung.
 
-    ```bash
-    git clone https://github.com/PATMESH/Learning-Management-System.git
-    ```
+## Tai khoan admin mac dinh
 
-2. Navigate to the frontend and backend folders and follow their respective setup instructions.
+Backend tu tao admin neu database chua co tai khoan quan tri:
 
-## Backend
+```text
+Email: admin@gmail.com
+Password: admin123
+```
 
-- Open the backend folder in IntelliJ IDEA or Spring Tool Suite (STS).
-- Update the database credentials in backend/application.properties.
-- Build and run the project from the IDE.
+Co the doi bang bien moi truong:
 
-## Frontend
+```powershell
+$env:ADMIN_EMAIL="admin@codepath.vn"
+$env:ADMIN_PASSWORD="your-password"
+```
 
-- Open the frontend folder in Visual Studio Code (VS Code).
-- Then the terminal, run:
+## Cau truc thu muc
 
-```bash
-    npm install
-    npm start
-```  
+```text
+Learning-Management-System/
+├─ backend/                  # Spring Boot REST API
+├─ frontend/                 # React application
+├─ docs/                     # Huong dan cau hinh Supabase
+├─ README.md
+└─ .gitignore
+```
 
-## Usage
+## Chay backend
 
-- Visit the application on http://localhost:3000.
+Yeu cau:
 
-- As an admin, you can manage courses, create assessments, and monitor user progress. To access the admin dashboard, if your application is running locally, you can navigate to http://localhost:3000/admin.
+- Java 17 tro len.
+- Maven wrapper da co san trong thu muc backend.
+- Supabase project hoac PostgreSQL local.
 
-## Default Admin Credentials
-- Email: admin@gmail.com
-- Password: admin123
+Cau hinh Supabase:
 
-- Users can register, log in, view courses, take assessments, and receive certificates.
+```powershell
+$env:DB_URL="jdbc:postgresql://<supabase-host>:5432/postgres?sslmode=require"
+$env:DB_USERNAME="postgres"
+$env:DB_PASSWORD="<supabase-database-password>"
+$env:DDL_AUTO="update"
+$env:JWT_SECRET="change-this-secret-to-a-long-random-string"
+```
 
-## API Documentation
+Chay backend:
 
-- Access interactive API docs at:
-  http://localhost:8080/swagger-ui/index.html
+```powershell
+cd E:\cnpm\Learning-Management-System\backend
+$env:JAVA_HOME="E:\Apache NetBeans\jdk"
+$env:Path="$env:JAVA_HOME\bin;$env:Path"
+.\mvnw.cmd spring-boot:run
+```
 
-## Contributing
+Swagger API:
 
-- Open issues to report bugs or suggest features
-- Submit pull requests to improve the project
-- Feedback and contributions are highly appreciated
+```text
+http://localhost:8080/swagger-ui/index.html
+```
 
-## Site Images
-**Login:**
+## Chay frontend
 
-<img width="1512" height="861" alt="image" src="https://github.com/user-attachments/assets/42b6bf7b-b974-45b4-98d1-54b09de79ec1" />
+```powershell
+cd E:\cnpm\Learning-Management-System\frontend
+npm.cmd install --cache .\.npm-cache
+npm.cmd start --cache .\.npm-cache
+```
 
+Mo trinh duyet:
 
+```text
+http://localhost:3000
+```
 
-**Register:**
-<img width="1512" height="858" alt="image" src="https://github.com/user-attachments/assets/3e033d24-5a75-4169-bbbc-4f1506b30b80" />
+Neu backend chay o URL khac, tao file `.env` trong thu muc `frontend`:
 
+```text
+REACT_APP_API_BASE_URL=http://localhost:8080
+```
 
+## Kiem tra build
 
-**Courses:**
-<img width="1512" height="863" alt="image" src="https://github.com/user-attachments/assets/d9b5bf85-da92-47de-af60-dd038619bd46" />
+Backend:
 
+```powershell
+cd E:\cnpm\Learning-Management-System\backend
+$env:JAVA_HOME="E:\Apache NetBeans\jdk"
+$env:Path="$env:JAVA_HOME\bin;$env:Path"
+.\mvnw.cmd --no-transfer-progress -DskipTests compile
+```
 
+Frontend:
 
-**Profile:**
-<img width="1504" height="857" alt="image" src="https://github.com/user-attachments/assets/16d6d7af-b24f-43a9-87e7-cb2b4877a708" />
-<img width="1512" height="858" alt="image" src="https://github.com/user-attachments/assets/946ac434-6511-4edf-922f-c44bdd8ec510" />
+```powershell
+cd E:\cnpm\Learning-Management-System\frontend
+$env:CI="false"
+npm.cmd run build --cache .\.npm-cache
+```
 
+## Git/GitHub workflow de xuat
 
+- `main`: nhanh on dinh de demo/nop bai.
+- `feature/auth`: dang nhap, dang ky, phan quyen.
+- `feature/course-management`: quan ly khoa hoc.
+- `feature/learning-progress`: dang ky hoc va tien do.
+- `feature/quiz-certificate`: quiz va chung chi.
+- `feature/ui-vietnamese`: Viet hoa giao dien va cai thien trai nghiem.
 
-**Learnings:**
-<img width="1512" height="862" alt="image" src="https://github.com/user-attachments/assets/73e52319-8e91-49ff-aa0b-3f92c9fad7c4" />
+Quy trinh:
 
+1. Tao issue hoac task tren Jira.
+2. Tao branch theo chuc nang.
+3. Commit theo tung phan nho.
+4. Tao pull request tren GitHub.
+5. Review va merge vao `main`.
 
+## Tai lieu bai tap lon
 
-**Course learning:**
-<img width="1512" height="860" alt="image" src="https://github.com/user-attachments/assets/ba9f6d1a-c1ce-4850-adba-059f84a57130" />
+Bo tai lieu de tai nam o thu muc ngoai repo:
 
+```text
+E:\cnpm\docs
+```
 
+Bao gom:
 
-**Assessment:**
-<img width="1512" height="861" alt="image" src="https://github.com/user-attachments/assets/669a7fe6-f6c9-4be7-93a6-a65daf971c43" />
-
-
-
-**Certificate:**
-<img width="1512" height="863" alt="image" src="https://github.com/user-attachments/assets/10f71d60-adbd-43b4-bde4-f9a793930811" />
-
-
-
-**Dashboard:**
-<img width="1512" height="864" alt="2025-10-23_15-57-52" src="https://github.com/user-attachments/assets/3f2101fa-fec2-409c-94cc-8720b90da1f2" />
-<img width="1512" height="865" alt="2025-10-23_15-58-03" src="https://github.com/user-attachments/assets/8f2c1f15-067d-4f81-abc3-9cb5730075c1" />
-<img width="1512" height="862" alt="2025-10-23_15-58-10" src="https://github.com/user-attachments/assets/edd2ac8b-7e7f-4a55-9517-e5e75eac337d" />
-<img width="1512" height="862" alt="image" src="https://github.com/user-attachments/assets/68cfeccf-b30b-44dc-80fa-e738ea976399" />
-
-
-
-**Course Management:**
-<img width="1512" height="861" alt="image" src="https://github.com/user-attachments/assets/2903c72c-029e-4ec3-a271-ecbe370db64b" />
-<img width="1512" height="861" alt="image" src="https://github.com/user-attachments/assets/c3ef2b07-1b13-4ba8-ab55-3c68ebf9ec78" />
-
-
-
-**Assessment Management:**
-<img width="1511" height="863" alt="image" src="https://github.com/user-attachments/assets/0cca862b-b7bc-4e5d-8483-286e9d3a6cad" />
-<img width="1512" height="862" alt="image" src="https://github.com/user-attachments/assets/925426e7-0183-49fc-8cbf-00c91b67092a" />
-
-
-
-**Home page:**
-<img width="1512" height="859" alt="image" src="https://github.com/user-attachments/assets/d7d5cd46-8981-48cf-bf0a-5efe43b7e58c" />
-<img width="1512" height="851" alt="image" src="https://github.com/user-attachments/assets/ee1fcd65-4c35-45ae-9ead-2eeabdad3042" />
-<img width="1512" height="856" alt="image" src="https://github.com/user-attachments/assets/3a1d890d-e597-40fb-9fba-481a903818ea" />
-
+- Project Vision.
+- SRS.
+- SDD.
+- Testcases Report.
+- Jira/Scrum Plan.
+- Supabase schema tham khao.

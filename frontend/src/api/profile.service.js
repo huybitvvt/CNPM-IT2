@@ -14,12 +14,15 @@ async function getProfileImage(userId) {
   try {
     const res = await api.get(`/api/users/${userId}/profile-image`, {
       responseType: "blob",
+      skipGlobalErrorToast: true,
     });
     const blobUrl = URL.createObjectURL(res.data);
     return { success: true, data: blobUrl };
   } catch (err) {
-    console.error("Error fetching profile image:", err);
-    return { success: false, error: "Unable to fetch profile image" };
+    if (err.response?.status !== 404) {
+      console.error("Error fetching profile image:", err);
+    }
+    return { success: false, error: "Chưa có ảnh đại diện" };
   }
 }
 

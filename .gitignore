@@ -41,6 +41,8 @@ build/Release
 # Dependency directories
 node_modules/
 jspm_packages/
+frontend/.npm-cache/
+frontend/build/
 
 # Snowpack dependency directory (https://snowpack.dev/)
 web_modules/
@@ -74,6 +76,7 @@ web_modules/
 
 # dotenv environment variable files
 .env
+.env.local.ps1
 .env.development.local
 .env.test.local
 .env.production.local

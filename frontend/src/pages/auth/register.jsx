@@ -1,10 +1,51 @@
-// RegistrationForm.js
 import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import Navbar from "../../Components/common/Navbar";
 import { authService } from "../../api/auth.service";
-import { User, Mail, Phone, Lock, Calendar, MapPin, Briefcase, Github, Linkedin, UserPlus } from "lucide-react";
-import { InputField } from "../../Components/common/InputFeild";
+import {
+  Briefcase,
+  Calendar,
+  Github,
+  Linkedin,
+  Lock,
+  Mail,
+  MapPin,
+  Phone,
+  User,
+  UserPlus,
+} from "lucide-react";
+
+function FormField({ id, label, icon: Icon, className = "", ...props }) {
+  return (
+    <div className={className}>
+      <label htmlFor={id} className="mb-2 block text-sm font-bold text-slate-800">
+        {label}
+      </label>
+      <div className="flex items-center rounded-xl border border-slate-200 bg-white px-3 transition focus-within:border-emerald-400 focus-within:ring-4 focus-within:ring-emerald-500/10">
+        <Icon className="mr-3 h-5 w-5 text-slate-400" />
+        <input
+          id={id}
+          className="min-h-[46px] w-full border-0 bg-transparent text-sm font-semibold text-slate-900 outline-none placeholder:text-slate-400"
+          {...props}
+        />
+      </div>
+    </div>
+  );
+}
+
+function SectionTitle({ index, title, subtitle }) {
+  return (
+    <div className="flex items-center gap-3 border-b border-slate-100 pb-3">
+      <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-emerald-500 to-teal-500 text-xs font-black text-white shadow">
+        {index}
+      </span>
+      <div>
+        <h3 className="m-0 font-display text-lg font-extrabold text-slate-900">{title}</h3>
+        <p className="m-0 mt-0.5 text-sm font-medium text-slate-500">{subtitle}</p>
+      </div>
+    </div>
+  );
+}
 
 function RegistrationForm() {
   const navigate = useNavigate();
@@ -37,251 +78,133 @@ function RegistrationForm() {
       const result = await authService.register(formData);
 
       if (result.success) {
-        console.log("Registration successful!");
         navigate("/login", {
-          state: { message: "Registration successful! Please sign in to continue." }
+          state: { message: "Tạo tài khoản thành công. Vui lòng đăng nhập để tiếp tục." },
         });
       } else {
-        setError(result.error || "Registration failed. Please try again.");
+        setError(result.error || "Tạo tài khoản thất bại. Vui lòng kiểm tra lại thông tin.");
       }
     } catch (error) {
       console.error("Registration error:", error);
-      setError("An unexpected error occurred. Please try again.");
+      setError("Có lỗi xảy ra khi tạo tài khoản. Vui lòng thử lại sau.");
     } finally {
       setIsLoading(false);
     }
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50">
+    <div className="min-h-screen bg-[#f6faf8] font-sans text-slate-900">
       <Navbar />
-      <div className="flex items-center justify-center py-8 px-4 sm:px-6 lg:px-8">
-        <div className="max-w-4xl w-full space-y-4">
-          <div className="text-center">
-            <div className="mx-auto h-14 w-14 bg-gradient-to-r from-blue-600 to-purple-600 rounded-full flex items-center justify-center mb-4 shadow-lg">
-              <UserPlus className="h-8 w-8 text-white" />
+
+      {/* compact dark header band */}
+      <section className="relative overflow-hidden bg-[#070b14]">
+        <div className="mesh-animated absolute inset-0 animate-gradient-shift bg-mesh-hero opacity-90" />
+        <div className="absolute inset-0 bg-grid-dark opacity-50" />
+        <div className="aurora-blob left-[-4%] top-[-40%] h-64 w-64 bg-emerald-500/30" />
+        <div className="aurora-blob right-[4%] bottom-[-50%] h-72 w-72 bg-sky-500/25" style={{ animationDelay: "-4s" }} />
+        <div className="absolute inset-x-0 bottom-0 h-16 bg-gradient-to-t from-[#f6faf8] to-transparent" />
+        <div className="relative mx-auto flex max-w-6xl flex-col justify-between gap-4 px-4 py-14 text-left sm:px-6 lg:flex-row lg:items-end lg:px-8">
+          <div>
+            <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-to-br from-emerald-500 to-teal-500 text-white shadow-lg">
+              <UserPlus className="h-6 w-6" />
             </div>
-            <h2 className="text-4xl font-bold text-gray-900 mb-2">Create Your Account</h2>
-            <p className="text-gray-600">Join our community and start your journey</p>
+            <h1 className="m-0 font-display text-3xl font-extrabold tracking-tight text-white sm:text-4xl">
+              Tạo tài khoản học lập trình
+            </h1>
+            <p className="m-0 mt-3 max-w-2xl text-base leading-7 text-slate-300">
+              Hoàn thiện hồ sơ để đăng ký khóa học, lưu tiến độ và nhận chứng chỉ khi hoàn thành.
+            </p>
           </div>
+          <div className="rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-sm font-semibold text-slate-300 backdrop-blur">
+            Đã có tài khoản?{" "}
+            <Link to="/login" className="font-bold text-emerald-400 transition hover:text-emerald-300">
+              Đăng nhập
+            </Link>
+          </div>
+        </div>
+      </section>
 
-          <div className="bg-white shadow-2xl rounded-2xl p-8 border border-gray-100">
-            <form onSubmit={handleSubmit} className="space-y-8">
-              {/* Basic Information */}
-              <div className="space-y-6">
-                <h3 className="text-lg font-semibold text-gray-800 border-b border-gray-200 pb-2">
-                  Basic Information
-                </h3>
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                  {/* Full Name */}
-                  <InputField
-                    id="username"
-                    name="username"
-                    value={formData.username}
-                    onChange={handleChange}
-                    icon={<User className="h-5 w-5 text-gray-400" />}
-                    label="Full Name"
-                    required
-                    placeholder="Enter your full name"
-                  />
-
-                  {/* Email */}
-                  <InputField
-                    id="email"
-                    name="email"
-                    type="email"
-                    value={formData.email}
-                    onChange={handleChange}
-                    icon={<Mail className="h-5 w-5 text-gray-400" />}
-                    label="Email Address"
-                    required
-                    placeholder="Enter your email"
-                  />
-
-                  {/* Phone */}
-                  <InputField
-                    id="mobileNumber"
-                    name="mobileNumber"
-                    type="tel"
-                    value={formData.mobileNumber}
-                    onChange={handleChange}
-                    icon={<Phone className="h-5 w-5 text-gray-400" />}
-                    label="Phone Number"
-                    required
-                    placeholder="Enter your phone number"
-                  />
-
-                  {/* Password */}
-                  <InputField
-                    id="password"
-                    name="password"
-                    type="password"
-                    value={formData.password}
-                    onChange={handleChange}
-                    icon={<Lock className="h-5 w-5 text-gray-400" />}
-                    label="Password"
-                    required
-                    placeholder="Create a strong password"
-                  />
+      <main className="px-4 pb-12 sm:px-6 lg:px-8">
+        <div className="mx-auto -mt-8 max-w-6xl">
+          <form onSubmit={handleSubmit} className="rounded-3xl border border-slate-200 bg-white p-5 shadow-soft-lg sm:p-8">
+            <div className="grid gap-8">
+              <section className="grid gap-5">
+                <SectionTitle index="1" title="Thông tin đăng nhập" subtitle="Các trường bắt buộc để hệ thống xác thực người dùng." />
+                <div className="grid grid-cols-1 gap-5 lg:grid-cols-2">
+                  <FormField id="username" name="username" value={formData.username} onChange={handleChange} icon={User} label="Họ và tên" required placeholder="Nguyễn Văn A" />
+                  <FormField id="email" name="email" type="email" value={formData.email} onChange={handleChange} icon={Mail} label="Email" required placeholder="you@example.com" />
+                  <FormField id="mobileNumber" name="mobileNumber" type="tel" value={formData.mobileNumber} onChange={handleChange} icon={Phone} label="Số điện thoại" required placeholder="0912345678" />
+                  <FormField id="password" name="password" type="password" value={formData.password} onChange={handleChange} icon={Lock} label="Mật khẩu" required placeholder="Tối thiểu 6 ký tự" />
                 </div>
-              </div>
+              </section>
 
-              {/* Personal Details */}
-              <div className="space-y-6">
-                <h3 className="text-lg font-semibold text-gray-800 border-b border-gray-200 pb-2">
-                  Personal Details
-                </h3>
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                  {/* DOB */}
-                  <InputField
-                    id="dob"
-                    name="dob"
-                    type="date"
-                    value={formData.dob}
-                    onChange={handleChange}
-                    icon={<Calendar className="h-5 w-5 text-gray-400" />}
-                    label="Date of Birth"
-                  />
-
-                  {/* Gender */}
-                  <div className="space-y-2">
-                    <label htmlFor="gender" className="block font-semibold bg-gradient-to-r from-indigo-500 to-purple-500 bg-clip-text text-transparent">
-                      Gender
+              <section className="grid gap-5">
+                <SectionTitle index="2" title="Hồ sơ cá nhân" subtitle="Thông tin giúp admin và instructor hỗ trợ người học tốt hơn." />
+                <div className="grid grid-cols-1 gap-5 lg:grid-cols-2">
+                  <FormField id="dob" name="dob" type="date" value={formData.dob} onChange={handleChange} icon={Calendar} label="Ngày sinh" />
+                  <div>
+                    <label htmlFor="gender" className="mb-2 block text-sm font-bold text-slate-800">
+                      Giới tính
                     </label>
                     <select
                       id="gender"
                       name="gender"
                       value={formData.gender}
                       onChange={handleChange}
-                      className="block w-full px-3 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-900 bg-white"
+                      className="min-h-[48px] w-full rounded-xl border border-slate-200 bg-white px-3 text-sm font-semibold text-slate-900 outline-none transition focus:border-emerald-400 focus:ring-4 focus:ring-emerald-500/10"
                     >
-                      <option value="">Select Gender</option>
-                      <option value="Male">Male</option>
-                      <option value="Female">Female</option>
-                      <option value="Other">Other</option>
-                      <option value="Prefer not to say">Prefer not to say</option>
+                      <option value="">Chọn giới tính</option>
+                      <option value="Male">Nam</option>
+                      <option value="Female">Nữ</option>
+                      <option value="Other">Khác</option>
+                      <option value="Prefer not to say">Không muốn chia sẻ</option>
                     </select>
                   </div>
+                  <FormField id="location" name="location" value={formData.location} onChange={handleChange} icon={MapPin} label="Khu vực" placeholder="TP. Hồ Chí Minh" />
+                  <FormField id="profession" name="profession" value={formData.profession} onChange={handleChange} icon={Briefcase} label="Nghề nghiệp" placeholder="Sinh viên, lập trình viên..." />
                 </div>
-              </div>
+              </section>
 
-              {/* Professional Details */}
-              <div className="space-y-6">
-                <h3 className="text-lg font-semibold text-gray-800 border-b border-gray-200 pb-2">
-                  Professional Details
-                </h3>
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                  <InputField
-                    id="location"
-                    name="location"
-                    value={formData.location}
-                    onChange={handleChange}
-                    icon={<MapPin className="h-5 w-5 text-gray-400" />}
-                    label="Location"
-                    placeholder="Enter your location"
-                  />
-
-                  <InputField
-                    id="profession"
-                    name="profession"
-                    value={formData.profession}
-                    onChange={handleChange}
-                    icon={<Briefcase className="h-5 w-5 text-gray-400" />}
-                    label="Profession"
-                    placeholder="Enter your profession"
-                  />
+              <section className="grid gap-5">
+                <SectionTitle index="3" title="Liên kết học tập" subtitle="Có thể bổ sung GitHub/LinkedIn để thể hiện hồ sơ lập trình." />
+                <div className="grid grid-cols-1 gap-5 lg:grid-cols-2">
+                  <FormField id="linkedin_url" name="linkedin_url" value={formData.linkedin_url} onChange={handleChange} icon={Linkedin} label="LinkedIn" placeholder="https://linkedin.com/in/username" />
+                  <FormField id="github_url" name="github_url" value={formData.github_url} onChange={handleChange} icon={Github} label="GitHub" placeholder="https://github.com/username" />
                 </div>
-              </div>
-
-              {/* Social Links */}
-              <div className="space-y-6">
-                <h3 className="text-lg font-semibold text-gray-800 border-b border-gray-200 pb-2">
-                  Social Links
-                </h3>
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                  <InputField
-                    id="linkedin_url"
-                    name="linkedin_url"
-                    value={formData.linkedin_url}
-                    onChange={handleChange}
-                    icon={<Linkedin className="h-5 w-5 text-gray-400" />}
-                    label="LinkedIn"
-                    placeholder="https://linkedin.com/in/your-profile"
-                  />
-
-                  <InputField
-                    id="github_url"
-                    name="github_url"
-                    value={formData.github_url}
-                    onChange={handleChange}
-                    icon={<Github className="h-5 w-5 text-gray-400" />}
-                    label="GitHub"
-                    placeholder="https://github.com/your-username"
-                  />
-                </div>
-              </div>
+              </section>
 
               {error && (
-                <div className="bg-red-50 border border-red-200 rounded-lg p-4">
-                  <p className="text-red-800 text-sm font-medium">{error}</p>
+                <div className="rounded-xl border border-rose-200 bg-rose-50 px-4 py-3">
+                  <p className="m-0 text-sm font-bold text-rose-700">{error}</p>
                 </div>
               )}
 
-              <button
-                type="submit"
-                disabled={isLoading}
-                className={`w-full py-4 px-6 rounded-lg font-semibold text-lg transition-all duration-200 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 focus:outline-none focus:ring-4 focus:ring-blue-300 ${isLoading
-                    ? "bg-gray-400 text-gray-200 cursor-not-allowed"
-                    : "bg-gradient-to-r from-blue-600 to-purple-600 text-white hover:from-blue-700 hover:to-purple-700"
-                  }`}
-              >
-                {isLoading ? (
-                  <div className="flex items-center justify-center">
-                    <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                    </svg>
-                    Creating Account...
-                  </div>
-                ) : (
-                  "Create Account"
-                )}
-              </button>
-            </form>
-            <div className="mt-8">
-              <div className="relative">
-                <div className="absolute inset-0 flex items-center">
-                  <div className="w-full border-t border-gray-300" />
-                </div>
-                <div className="relative flex justify-center text-sm">
-                  <span className="px-4 bg-white text-gray-500">Already have an account?</span>
-                </div>
-              </div>
-
-              <div className="mt-6 text-center">
-                <p className="text-gray-600">
-                  <Link
-                    to="/login"
-                    className="text-blue-600 font-semibold hover:text-blue-700 transition-colors text-lg"
-                  >
-                    Sign in here
-                  </Link>
+              <div className="flex flex-col items-start justify-between gap-4 border-t border-slate-100 pt-5 lg:flex-row lg:items-center">
+                <p className="m-0 max-w-xl text-xs font-medium leading-6 text-slate-500">
+                  Khi tạo tài khoản, bạn đồng ý với{" "}
+                  <Link to="/terms" className="font-bold text-emerald-600">Điều khoản sử dụng</Link>
+                  {" "}và{" "}
+                  <Link to="/privacy" className="font-bold text-emerald-600">Chính sách bảo mật</Link>.
                 </p>
+                <button
+                  type="submit"
+                  disabled={isLoading}
+                  className={`group relative inline-flex w-full items-center justify-center gap-2 overflow-hidden rounded-xl px-6 py-3.5 text-sm font-bold transition focus:outline-none focus:ring-4 focus:ring-emerald-500/20 lg:w-auto ${
+                    isLoading
+                      ? "cursor-not-allowed bg-slate-400 text-white"
+                      : "bg-gradient-to-r from-emerald-500 to-teal-500 text-white shadow-glow-emerald"
+                  }`}
+                >
+                  {!isLoading && (
+                    <span className="absolute inset-0 -translate-x-full bg-gradient-to-r from-transparent via-white/30 to-transparent transition-transform duration-700 group-hover:translate-x-full" />
+                  )}
+                  {isLoading ? "Đang tạo tài khoản..." : "Tạo tài khoản"}
+                </button>
               </div>
             </div>
-          </div>
-
-          {/* Terms and Privacy */}
-          <div className="text-center">
-            <p className="text-sm text-gray-500">
-              By creating an account, you agree to our{" "}
-              <a href="#" className="text-blue-600 hover:text-blue-700 transition-colors">Terms of Service</a>
-              {" "}and{" "}
-              <a href="#" className="text-blue-600 hover:text-blue-700 transition-colors">Privacy Policy</a>
-            </p>
-          </div>
+          </form>
         </div>
-      </div>
+      </main>
     </div>
   );
 }

@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import com.lms.dev.dto.UserProfileResponse;
 import com.lms.dev.entity.User;
 import com.lms.dev.repository.UserRepository;
 import org.springframework.web.multipart.MultipartFile;
@@ -23,11 +24,22 @@ public class UserService {
         return userRepository.findAll();
     }
 
+    public List<UserProfileResponse> getAllUserProfiles() {
+        return userRepository.findAllProfiles();
+    }
+
     public User getUserById(UUID id) {
         return userRepository.findById(id).orElse(null);
     }
 
+    public UserProfileResponse getUserProfileById(UUID id) {
+        return userRepository.findProfileById(id).orElse(null);
+    }
+
     public User createUser(User user) {
+        if (user.getPassword() == null || user.getPassword().isBlank()) {
+            throw new IllegalArgumentException("Mật khẩu không được để trống.");
+        }
         user.setPassword(passwordEncoder.encode(user.getPassword()));
         return userRepository.save(user);
     }

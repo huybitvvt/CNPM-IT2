@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import { message } from "antd";
 import { courseService } from "../../api/course.service";
 
@@ -6,38 +6,38 @@ const Feedback = ({ courseid }) => {
   const [feedback, setFeedback] = useState("");
   const [feedbacks, setFeedbacks] = useState([]);
 
-  const fetchFeedbacks = async () => {
+  const fetchFeedbacks = useCallback(async () => {
     const res = await courseService.getFeedbacks(courseid);
     if (res.success) {
       setFeedbacks(res.data.slice(0, 5));
     } else {
-      message.error(res.error || "Failed to load feedbacks");
+      message.error(res.error || "Không thể tải phản hồi");
     }
-  };
+  }, [courseid]);
 
   useEffect(() => {
     fetchFeedbacks();
-  }, [courseid]);
+  }, [fetchFeedbacks]);
 
   const sendFeedback = async () => {
     if (!feedback.trim()) {
-      message.warning("Please enter feedback before submitting");
+      message.warning("Vui lòng nhập phản hồi trước khi gửi");
       return;
     }
 
     const res = await courseService.postFeedback(courseid, feedback);
     if (res.success) {
-      message.success("Feedback submitted 🎉");
+      message.success("Đã gửi phản hồi");
       setFeedback("");
       fetchFeedbacks();
     } else {
-      message.error(res.error || "Failed to submit feedback");
+      message.error(res.error || "Không thể gửi phản hồi");
     }
   };
 
   return (
     <div className="bg-white rounded-2xl shadow-md p-6 mt-10">
-      <h3 className="text-xl font-bold text-neutral mb-4">Feedback</h3>
+      <h3 className="text-xl font-bold text-neutral mb-4">Phản hồi khóa học</h3>
 
       {/* Feedback List */}
       <div className="space-y-4 mb-6 max-h-60 overflow-y-auto pr-2">
@@ -55,7 +55,7 @@ const Feedback = ({ courseid }) => {
             </div>
           ))
         ) : (
-          <p className="text-gray-500 italic">No feedback yet. Be the first!</p>
+          <p className="text-gray-500 italic">Chưa có phản hồi. Hãy là người đầu tiên!</p>
         )}
       </div>
 
@@ -63,7 +63,7 @@ const Feedback = ({ courseid }) => {
       <div className="flex gap-3">
         <input
           type="text"
-          placeholder="Write your feedback..."
+          placeholder="Viết phản hồi của bạn..."
           className="flex-1 border border-gray-300 rounded-full px-4 py-2 focus:outline-none focus:ring-2 focus:ring-primary"
           onChange={(e) => setFeedback(e.target.value)}
           value={feedback}
@@ -72,7 +72,7 @@ const Feedback = ({ courseid }) => {
           onClick={sendFeedback}
           className="px-5 py-2 bg-primary text-white font-semibold rounded-full hover:bg-accent/90 transition"
         >
-          Send
+          Gửi
         </button>
       </div>
     </div>

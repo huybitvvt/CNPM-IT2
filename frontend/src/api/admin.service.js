@@ -69,6 +69,46 @@ async function deleteCourse(courseId) {
   }
 }
 
+async function getLessonsByCourse(courseId) {
+  try {
+    const { data } = await api.get(`/api/courses/${courseId}/lessons`);
+    return { success: true, data };
+  } catch (error) {
+    console.error("Error fetching lessons:", error);
+    return { success: false, error: "Could not fetch course lessons" };
+  }
+}
+
+async function createLesson(courseId, lessonData) {
+  try {
+    const { data } = await api.post(`/api/courses/${courseId}/lessons`, lessonData);
+    return { success: true, data };
+  } catch (error) {
+    console.error("Error creating lesson:", error);
+    return { success: false, error: "Could not create lesson" };
+  }
+}
+
+async function updateLesson(lessonId, lessonData) {
+  try {
+    const { data } = await api.put(`/api/courses/lessons/${lessonId}`, lessonData);
+    return { success: true, data };
+  } catch (error) {
+    console.error("Error updating lesson:", error);
+    return { success: false, error: "Could not update lesson" };
+  }
+}
+
+async function deleteLesson(lessonId) {
+  try {
+    await api.delete(`/api/courses/lessons/${lessonId}`);
+    return { success: true };
+  } catch (error) {
+    console.error("Error deleting lesson:", error);
+    return { success: false, error: "Could not delete lesson" };
+  }
+}
+
 async function getAllUsers() {
   try {
     const { data } = await api.get("/api/users");
@@ -135,6 +175,10 @@ export const adminService = {
   createCourse,
   updateCourse,
   deleteCourse,
+  getLessonsByCourse,
+  createLesson,
+  updateLesson,
+  deleteLesson,
   createQuestion,
   updateQuestion,
   deleteQuestion,

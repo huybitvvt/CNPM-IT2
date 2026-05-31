@@ -1,5 +1,4 @@
-import React, { useState, useEffect } from 'react';
-import { useNavigate, useLocation } from 'react-router-dom';
+import React, { useCallback, useState, useEffect } from 'react';
 import { 
   Card, 
   Form, 
@@ -10,7 +9,6 @@ import {
   message, 
   Row, 
   Col,
-  Divider,
   Table,
   Modal,
   Popconfirm
@@ -32,8 +30,6 @@ const { TextArea } = Input;
 const { Option } = Select;
 
 function AddQuestion({ courseId, onBack }) {
-  const location = useLocation();
-  const navigate = useNavigate();
   const [form] = Form.useForm();
   const [loading, setLoading] = useState(false);
   const [questions, setQuestions] = useState([]);
@@ -43,11 +39,7 @@ function AddQuestion({ courseId, onBack }) {
   const [isAddModalVisible, setIsAddModalVisible] = useState(false); // New state for Add Modal
   const [editForm] = Form.useForm();
   
-  useEffect(() => {
-    fetchQuestions();
-  }, [courseId]);
-
-  const fetchQuestions = async () => {
+  const fetchQuestions = useCallback(async () => {
     setLoadingQuestions(true);
     try {
       const result = await questionService.getQuestionsByCourse(courseId);
@@ -61,7 +53,11 @@ function AddQuestion({ courseId, onBack }) {
     } finally {
       setLoadingQuestions(false);
     }
-  };
+  }, [courseId]);
+
+  useEffect(() => {
+    fetchQuestions();
+  }, [fetchQuestions]);
 
   const getActualAnswerValue = (values, selectedAnswer) => {
     const answerMap = {
@@ -169,10 +165,6 @@ function AddQuestion({ courseId, onBack }) {
     } catch (error) {
       message.error('An unexpected error occurred');
     }
-  };
-
-  const handleCancel = () => {
-    navigate(-1);
   };
 
   const columns = [

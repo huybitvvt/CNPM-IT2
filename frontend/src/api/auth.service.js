@@ -32,9 +32,12 @@ async function login(email, password) {
         },
       };
     } else {
+      const message = result.message || result.error || "Login failed";
       return {
         success: false,
-        error: result.message || "Login failed",
+        error: message.includes("Full authentication")
+          ? "Email hoặc mật khẩu không chính xác."
+          : message,
       };
     }
   } catch (error) {
@@ -73,6 +76,52 @@ async function register(formData) {
     return {
       success: false,
       error: "Network error. Please try again.",
+    };
+  }
+}
+
+async function forgotPassword(email) {
+  try {
+    const response = await fetch(`${API_BASE_URL}/api/auth/forgot-password`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ email }),
+    });
+
+    const data = await response.json();
+    return response.ok
+      ? { success: true, message: data.message }
+      : { success: false, error: data.message || data.error || "Không gửi được email đặt lại mật khẩu." };
+  } catch (error) {
+    console.error("Forgot password error:", error);
+    return {
+      success: false,
+      error: "Không kết nối được máy chủ. Vui lòng thử lại.",
+    };
+  }
+}
+
+async function resetPassword(token, newPassword) {
+  try {
+    const response = await fetch(`${API_BASE_URL}/api/auth/reset-password`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ token, newPassword }),
+    });
+
+    const data = await response.json();
+    return response.ok
+      ? { success: true, message: data.message }
+      : { success: false, error: data.message || data.error || "Không đặt lại được mật khẩu." };
+  } catch (error) {
+    console.error("Reset password error:", error);
+    return {
+      success: false,
+      error: "Không kết nối được máy chủ. Vui lòng thử lại.",
     };
   }
 }
@@ -158,6 +207,8 @@ function getAuthHeader() {
 export const authService = {
   login,
   register,
+  forgotPassword,
+  resetPassword,
   getUserDetails,
   logout,
   isAdminAuthenticated,

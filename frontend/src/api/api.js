@@ -23,19 +23,23 @@ api.interceptors.request.use(
 api.interceptors.response.use(
   (response) => response,
   (error) => {
+    if (error.config?.skipGlobalErrorToast) {
+      return Promise.reject(error);
+    }
+
     if (error.response?.status === 401) {
       message.destroy()
-      message.error("Session expired or unauthorized. Please log in again.");
+      message.error("Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại.");
       localStorage.clear();
       setTimeout(() => {
         window.location.href = "/login";
       }, 1000);
     } else if (error.response?.status === 403) {
-      message.error("You don’t have permission to perform this action.");
+      message.error("Bạn không có quyền thực hiện thao tác này.");
     } else if (error.response?.status === 404) {
-      message.error("Requested resource not found.");
+      message.error("Không tìm thấy tài nguyên yêu cầu.");
     } else if (error.response?.status >= 500) {
-      message.error("Server error. Please try again later.");
+      message.error("Máy chủ đang gặp lỗi. Vui lòng thử lại sau.");
     }
     return Promise.reject(error);
   }

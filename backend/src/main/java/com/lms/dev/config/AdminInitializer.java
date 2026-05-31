@@ -27,17 +27,56 @@ public class AdminInitializer {
     public CommandLineRunner createDefaultAdmin(UserRepository userRepository,
                                                 PasswordEncoder passwordEncoder) {
         return args -> {
-            if (!userRepository.existsByRole(UserRole.ADMIN)) {
-                User admin = new User();
-                admin.setUsername(defaultUsername);
-                admin.setPassword(passwordEncoder.encode(defaultPassword));
-                admin.setEmail(defaultEmail);
-                admin.setRole(UserRole.ADMIN);
-                userRepository.save(admin);
-                log.info("Default admin user created.");
-            } else {
-                log.info("Admin user already exists, skipping creation.");
-            }
+            upsertDemoAccount(
+                    userRepository,
+                    passwordEncoder,
+                    defaultEmail,
+                    defaultUsername,
+                    defaultPassword,
+                    UserRole.ADMIN,
+                    "Quản trị viên CodePath"
+            );
+
+            upsertDemoAccount(
+                    userRepository,
+                    passwordEncoder,
+                    "user@gmail.com",
+                    "Nguyễn Văn Học",
+                    "user123",
+                    UserRole.USER,
+                    "Học viên demo"
+            );
         };
+    }
+
+    private void upsertDemoAccount(UserRepository userRepository,
+                                   PasswordEncoder passwordEncoder,
+                                   String email,
+                                   String username,
+                                   String rawPassword,
+                                   UserRole role,
+                                   String profession) {
+        User user = userRepository.findByEmail(email);
+
+        if (user == null) {
+            user = new User();
+            user.setEmail(email);
+            user.setMobileNumber(role == UserRole.ADMIN ? "0900000001" : "0900000002");
+            user.setLocation("TP. Hồ Chí Minh");
+            user.setGender("Prefer not to say");
+            user.setGithub_url("https://github.com/demo");
+        }
+
+        user.setUsername(username);
+        user.setRole(role);
+        user.setProfession(profession);
+        user.setIsActive(true);
+
+        if (user.getPassword() == null || !passwordEncoder.matches(rawPassword, user.getPassword())) {
+            user.setPassword(passwordEncoder.encode(rawPassword));
+        }
+
+        userRepository.save(user);
+        log.info("Demo account ready: {} ({})", email, role);
     }
 }

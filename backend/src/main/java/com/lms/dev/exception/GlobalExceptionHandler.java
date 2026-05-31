@@ -6,6 +6,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.server.ResponseStatusException;
 import org.springframework.web.servlet.NoHandlerFoundException;
 
 import java.util.HashMap;
@@ -40,6 +41,34 @@ public class GlobalExceptionHandler {
         body.put("path", request.getRequestURI());
 
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(body);
+    }
+
+    @ExceptionHandler(ResponseStatusException.class)
+    public ResponseEntity<Map<String, Object>> handleResponseStatusException(
+            HttpServletRequest request,
+            ResponseStatusException ex) {
+
+        Map<String, Object> body = new HashMap<>();
+        body.put("status", ex.getStatusCode().value());
+        body.put("error", ex.getStatusCode().toString());
+        body.put("message", ex.getReason());
+        body.put("path", request.getRequestURI());
+
+        return ResponseEntity.status(ex.getStatusCode()).body(body);
+    }
+
+    @ExceptionHandler(IllegalArgumentException.class)
+    public ResponseEntity<Map<String, Object>> handleIllegalArgument(
+            HttpServletRequest request,
+            IllegalArgumentException ex) {
+
+        Map<String, Object> body = new HashMap<>();
+        body.put("status", HttpStatus.BAD_REQUEST.value());
+        body.put("error", "Bad Request");
+        body.put("message", ex.getMessage());
+        body.put("path", request.getRequestURI());
+
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(body);
     }
 }
 

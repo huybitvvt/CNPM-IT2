@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
 import Navbar from "../../Components/common/Navbar";
 import ImgUpload from "./ImgUpload";
 import Performance from "./Performance";
@@ -29,11 +28,18 @@ function Profile() {
   const [userDetails, setUserDetails] = useState(null);
   const [profileImage, setProfileImage] = useState(localStorage.getItem("profileImage") || "");
   const [loadingImage, setLoadingImage] = useState(true);
+  const [loadingProfile, setLoadingProfile] = useState(true);
   const [activeTab, setActiveTab] = useState("overview");
   const [isEditModalVisible, setIsEditModalVisible] = useState(false);
 
   useEffect(() => {
     async function fetchUserDetails() {
+      if (!id) {
+        setLoadingImage(false);
+        setLoadingProfile(false);
+        return;
+      }
+
       try {
         const userRes = await profileService.getUserDetails(id);
         if (userRes.success) {
@@ -46,6 +52,7 @@ function Profile() {
         }
       } finally {
         setLoadingImage(false);
+        setLoadingProfile(false);
       }
     }
     fetchUserDetails();
@@ -53,7 +60,7 @@ function Profile() {
 
   const updateUser = async (updatedData) => {
     try {
-      const res = await profileService.updateUser(id, updatedData);
+      await profileService.updateUser(id, updatedData);
 
       setUserDetails(prevDetails => ({
         ...prevDetails,
@@ -84,10 +91,19 @@ function Profile() {
     const file = event.target.files[0];
     if (!file) return;
 
+    if (file.size > 2 * 1024 * 1024) {
+      alert("Ảnh đại diện nên nhỏ hơn 2MB để tải nhanh khi demo.");
+      return;
+    }
+
+    setLoadingImage(true);
     const res = await profileService.uploadProfileImage(id, file);
     if (res.success) {
-      setProfileImage(URL.createObjectURL(file));
+      const previewUrl = URL.createObjectURL(file);
+      setProfileImage(previewUrl);
+      localStorage.setItem("profileImage", previewUrl);
     }
+    setLoadingImage(false);
   };
 
   const getGenderIcon = (gender) => {
@@ -96,7 +112,7 @@ function Profile() {
     return faUser;
   };
 
-  if (!userDetails && !loadingImage) {
+  if (loadingProfile) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-indigo-100 via-white to-purple-100">
         <Navbar page="profile" />

@@ -5,6 +5,7 @@ import io.jsonwebtoken.*;
 import io.jsonwebtoken.security.Keys;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Component;
 
@@ -26,13 +27,30 @@ public class JwtUtils {
     public String generateJwtToken(Authentication authentication) {
         UserPrincipal userPrincipal = (UserPrincipal) authentication.getPrincipal();
 
+        return generateToken(
+                userPrincipal.getEmail(),
+                userPrincipal.getId(),
+                userPrincipal.getAuthorities().iterator().next().getAuthority()
+        );
+    }
+
+    public String generateJwtToken(UserPrincipal userPrincipal) {
+        String role = userPrincipal.getAuthorities().stream()
+                .findFirst()
+                .map(GrantedAuthority::getAuthority)
+                .orElse("ROLE_USER");
+
+        return generateToken(userPrincipal.getEmail(), userPrincipal.getId(), role);
+    }
+
+    private String generateToken(String email, UUID userId, String role) {
         return Jwts.builder()
-                .setSubject(userPrincipal.getEmail())
-                .claim("userId", userPrincipal.getId())
-                .claim("role", userPrincipal.getAuthorities().iterator().next().getAuthority())
+                .setSubject(email)
+                .claim("userId", userId)
+                .claim("role", role)
                 .setIssuedAt(new Date())
                 .setExpiration(new Date(System.currentTimeMillis() + jwtExpirationMs))
-                .signWith(getSigningKey(), SignatureAlgorithm.HS512)
+                .signWith(getSigningKey(), SignatureAlgorithm.HS256)
                 .compact();
     }
 

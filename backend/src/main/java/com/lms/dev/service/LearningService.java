@@ -27,21 +27,7 @@ public class LearningService {
     private final ProgressRepository progressRepository;
 
     public List<Course> getLearningCourses(UUID userId) {
-        Optional<User> optionalUser = userRepository.findById(userId);
-        
-        if (optionalUser.isPresent()) {
-            User user = optionalUser.get();
-            List<Course> learningCourses = new ArrayList<>();
-
-            for (Learning learning : user.getLearningCourses()) {
-                Course course = learning.getCourse();
-                learningCourses.add(course);
-            }
-
-            return learningCourses;
-        }
-
-        return null;
+        return learningRepository.findCoursesByUserId(userId);
     }
     
     public List<Learning> getEnrollments() {

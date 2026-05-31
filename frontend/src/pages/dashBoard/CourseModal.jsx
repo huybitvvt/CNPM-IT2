@@ -1,8 +1,9 @@
-import { Modal, Form, Input, InputNumber, message } from "antd";
-import { useState, useEffect } from "react";
+import { Modal, Form, Input, InputNumber, Select, message } from "antd";
+import { useState, useEffect, useCallback } from "react";
 import { adminService } from "../../api/admin.service";
 
 const { TextArea } = Input;
+const { Option } = Select;
 
 function CourseModal({ isOpen, onClose, onSuccess, courseId = null, mode = "add" }) {
   const [form] = Form.useForm();
@@ -10,19 +11,11 @@ function CourseModal({ isOpen, onClose, onSuccess, courseId = null, mode = "add"
   const [fetchingData, setFetchingData] = useState(false);
 
   const isEditMode = mode === "edit" || courseId !== null;
-  const modalTitle = isEditMode ? "Edit Course" : "Add New Course";
-  const submitButtonText = isEditMode ? "Update Course" : "Add Course";
-  const loadingText = isEditMode ? "Updating..." : "Adding...";
+  const modalTitle = isEditMode ? "Cập nhật khóa học" : "Thêm khóa học mới";
+  const submitButtonText = isEditMode ? "Cập nhật khóa học" : "Thêm khóa học";
+  const loadingText = isEditMode ? "Đang cập nhật..." : "Đang thêm...";
 
-  useEffect(() => {
-    if (isOpen && isEditMode && courseId) {
-      fetchCourseData();
-    } else if (isOpen && !isEditMode) {
-      form.resetFields();
-    }
-  }, [isOpen, courseId, isEditMode]);
-
-  const fetchCourseData = async () => {
+  const fetchCourseData = useCallback(async () => {
     setFetchingData(true);
     try {
       const result = await adminService.getCourseById(courseId);
@@ -30,6 +23,9 @@ function CourseModal({ isOpen, onClose, onSuccess, courseId = null, mode = "add"
         const formData = {
           course_name: result.data.course_name,
           instructor: result.data.instructor,
+          category: result.data.category,
+          level: result.data.level,
+          durationHours: result.data.durationHours,
           price: result.data.price,
           description: result.data.description,
           y_link: result.data.y_link,
@@ -41,12 +37,20 @@ function CourseModal({ isOpen, onClose, onSuccess, courseId = null, mode = "add"
         onClose();
       }
     } catch {
-      message.error("Failed to fetch course data");
+        message.error("Không thể tải dữ liệu khóa học");
       onClose();
     } finally {
       setFetchingData(false);
     }
-  };
+  }, [courseId, form, onClose]);
+
+  useEffect(() => {
+    if (isOpen && isEditMode && courseId) {
+      fetchCourseData();
+    } else if (isOpen && !isEditMode) {
+      form.resetFields();
+    }
+  }, [isOpen, courseId, isEditMode, fetchCourseData, form]);
 
   const handleSubmit = async (values) => {
     setLoading(true);
@@ -56,6 +60,9 @@ function CourseModal({ isOpen, onClose, onSuccess, courseId = null, mode = "add"
         const editData = {
           course_name: values.course_name,
           instructor: values.instructor,
+          category: values.category,
+          level: values.level,
+          durationHours: values.durationHours,
           price: values.price,
           description: values.description,
           y_link: values.y_link,
@@ -66,6 +73,9 @@ function CourseModal({ isOpen, onClose, onSuccess, courseId = null, mode = "add"
         const addData = {
           course_name: values.course_name,
           instructor: values.instructor,
+          category: values.category,
+          level: values.level,
+          durationHours: values.durationHours,
           price: values.price,
           description: values.description,
           y_link: values.y_link,
@@ -75,7 +85,7 @@ function CourseModal({ isOpen, onClose, onSuccess, courseId = null, mode = "add"
       }
 
       if (result.success) {
-        message.success(isEditMode ? "Course updated successfully!" : "Course added successfully!");
+        message.success(isEditMode ? "Cập nhật khóa học thành công" : "Thêm khóa học thành công");
         form.resetFields();
         onClose();
         onSuccess?.();
@@ -83,7 +93,7 @@ function CourseModal({ isOpen, onClose, onSuccess, courseId = null, mode = "add"
         message.error(result.error);
       }
     } catch {
-      message.error("An unexpected error occurred");
+      message.error("Đã xảy ra lỗi, vui lòng thử lại");
     } finally {
       setLoading(false);
     }
@@ -107,7 +117,7 @@ function CourseModal({ isOpen, onClose, onSuccess, courseId = null, mode = "add"
       {fetchingData ? (
         <div className="flex justify-center items-center h-32">
           <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-900"></div>
-          <span className="ml-3 text-gray-600">Loading course data...</span>
+          <span className="ml-3 text-gray-600">Đang tải dữ liệu khóa học...</span>
         </div>
       ) : (
         <Form
@@ -118,6 +128,9 @@ function CourseModal({ isOpen, onClose, onSuccess, courseId = null, mode = "add"
           initialValues={{
             course_name: "",
             instructor: "",
+            category: "Frontend",
+            level: "Beginner",
+            durationHours: 12,
             price: 0,
             description: "",
             y_link: "",
@@ -125,80 +138,121 @@ function CourseModal({ isOpen, onClose, onSuccess, courseId = null, mode = "add"
           }}
         >
           <Form.Item
-            label="Course Name"
+            label="Tên khóa học"
             name="course_name"
             rules={[
-              { required: true, message: "Course name is required" },
-              { min: 3, message: "Course name must be at least 3 characters" },
-              { max: 100, message: "Course name cannot exceed 100 characters" },
+              { required: true, message: "Vui lòng nhập tên khóa học" },
+              { min: 3, message: "Tên khóa học cần ít nhất 3 ký tự" },
+              { max: 100, message: "Tên khóa học không vượt quá 100 ký tự" },
             ]}
           >
-            <Input placeholder="Enter course name" />
+            <Input placeholder="Ví dụ: Spring Boot REST API và JWT" />
           </Form.Item>
 
           <Form.Item
-            label="Instructor"
+            label="Giảng viên"
             name="instructor"
             rules={[
-              { required: true, message: "Instructor is required" },
-              { min: 2, message: "Instructor name must be at least 2 characters" },
+              { required: true, message: "Vui lòng nhập tên giảng viên" },
+              { min: 2, message: "Tên giảng viên cần ít nhất 2 ký tự" },
             ]}
           >
-            <Input placeholder="Enter instructor name" />
+            <Input placeholder="Nhập tên giảng viên phụ trách" />
           </Form.Item>
 
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <Form.Item
+              label="Danh mục"
+              name="category"
+              rules={[{ required: true, message: "Vui lòng chọn danh mục" }]}
+            >
+              <Select placeholder="Chọn danh mục">
+                <Option value="Frontend">Frontend</Option>
+                <Option value="Backend">Backend</Option>
+                <Option value="Database">Database</Option>
+                <Option value="Data">Data</Option>
+                <Option value="Mobile">Mobile</Option>
+                <Option value="DevOps">DevOps</Option>
+                <Option value="Programming">Programming</Option>
+              </Select>
+            </Form.Item>
+
+            <Form.Item
+              label="Cấp độ"
+              name="level"
+              rules={[{ required: true, message: "Vui lòng chọn cấp độ" }]}
+            >
+              <Select placeholder="Chọn cấp độ">
+                <Option value="Beginner">Beginner</Option>
+                <Option value="Intermediate">Intermediate</Option>
+                <Option value="Advanced">Advanced</Option>
+              </Select>
+            </Form.Item>
+
+            <Form.Item
+              label="Thời lượng"
+              name="durationHours"
+              rules={[
+                { required: true, message: "Vui lòng nhập thời lượng" },
+                { type: "number", min: 1, message: "Thời lượng tối thiểu là 1 giờ" },
+              ]}
+            >
+              <InputNumber className="w-full" min={1} max={200} addonAfter="giờ" />
+            </Form.Item>
+          </div>
+
           <Form.Item
-            label="Price"
+            label="Học phí"
             name="price"
             rules={[
-              { required: true, message: "Price is required" },
-              { type: "number", min: 0, message: "Price must be a positive number" },
+              { required: true, message: "Vui lòng nhập học phí" },
+              { type: "number", min: 0, message: "Học phí không được âm" },
             ]}
           >
             <InputNumber
-              placeholder="Enter price"
+              placeholder="Nhập học phí"
               className="w-full"
               min={0}
               step={0.01}
               formatter={(value) =>
-                `$ ${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ",")
+                `${value} VND`.replace(/\B(?=(\d{3})+(?!\d))/g, ",")
               }
-              parser={(value) => value.replace(/\$\s?|(,*)/g, "")}
+              parser={(value) => value.replace(/\s?VND|(,*)/g, "")}
             />
           </Form.Item>
 
           <Form.Item
-            label="Description"
+            label="Mô tả khóa học"
             name="description"
             rules={[
-              { required: true, message: "Description is required" },
-              { min: 10, message: "Description must be at least 10 characters" },
-              { max: 500, message: "Description cannot exceed 500 characters" },
+              { required: true, message: "Vui lòng nhập mô tả khóa học" },
+              { min: 10, message: "Mô tả cần ít nhất 10 ký tự" },
+              { max: 500, message: "Mô tả không vượt quá 500 ký tự" },
             ]}
           >
-            <TextArea rows={4} placeholder="Enter course description" showCount maxLength={500} />
+            <TextArea rows={4} placeholder="Mô tả mục tiêu, nội dung chính và kết quả đầu ra của khóa học" showCount maxLength={500} />
           </Form.Item>
 
           <Form.Item
-            label="Video Link"
+            label="Liên kết video"
             name="y_link"
             rules={[
-              { required: true, message: "Video link is required" },
-              { type: "url", message: "Please enter a valid URL" },
+              { required: true, message: "Vui lòng nhập liên kết video" },
+              { type: "url", message: "Vui lòng nhập URL hợp lệ" },
             ]}
           >
-            <Input placeholder="https://example.com/video" />
+            <Input placeholder="https://www.youtube.com/watch?v=..." />
           </Form.Item>
 
           <Form.Item
-            label="Image Link"
+            label="Ảnh đại diện khóa học"
             name="p_link"
             rules={[
-              { required: true, message: "Image link is required" },
-              { type: "url", message: "Please enter a valid URL" },
+              { required: true, message: "Vui lòng nhập liên kết ảnh" },
+              { type: "url", message: "Vui lòng nhập URL hợp lệ" },
             ]}
           >
-            <Input placeholder="https://example.com/image.jpg" />
+            <Input placeholder="https://example.com/course-thumbnail.jpg" />
           </Form.Item>
 
           <div className="flex justify-end gap-4 pt-4 border-t border-gray-200">
@@ -208,7 +262,7 @@ function CourseModal({ isOpen, onClose, onSuccess, courseId = null, mode = "add"
               className="px-6 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors font-medium"
               disabled={loading}
             >
-              Cancel
+              Hủy
             </button>
             <button
               type="submit"

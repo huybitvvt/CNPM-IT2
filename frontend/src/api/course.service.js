@@ -20,6 +20,16 @@ async function getCourseById(courseId) {
   }
 }
 
+async function getLessonsByCourse(courseId) {
+  try {
+    const { data } = await api.get(`/api/courses/${courseId}/lessons`);
+    return { success: true, data };
+  } catch (error) {
+    console.error("Error fetching course lessons:", error);
+    return { success: false, error: "Could not fetch course lessons" };
+  }
+}
+
 async function getFeedbacks(courseId) {
   try {
     const { data } = await api.get(`/api/feedbacks/${courseId}`);
@@ -63,6 +73,7 @@ async function addMessage(formData) {
 export const courseService = {
   getAllCourses,
   getCourseById,
+  getLessonsByCourse,
   getFeedbacks,
   postFeedback,
   getMessages,

@@ -7,6 +7,7 @@ import org.springframework.web.bind.annotation.*;
 
 import com.lms.dev.entity.User;
 import com.lms.dev.service.UserService;
+import com.lms.dev.dto.UserProfileResponse;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.Collections;
@@ -23,13 +24,13 @@ public class UserController {
 
     @PreAuthorize("hasRole('ADMIN')")
     @GetMapping
-    public List<User> getAllUsers() {
-        return userService.getAllUsers();
+    public List<UserProfileResponse> getAllUsers() {
+        return userService.getAllUserProfiles();
     }
 
     @GetMapping("/{id}")
-    public User getUserById(@PathVariable UUID id) {
-        return userService.getUserById(id);
+    public UserProfileResponse getUserById(@PathVariable UUID id) {
+        return userService.getUserProfileById(id);
     }
 
     @GetMapping("/{id}/profile-image")

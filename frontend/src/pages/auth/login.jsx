@@ -1,10 +1,35 @@
 import React, { useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useUserContext } from "../../contexts/UserContext";
 import Navbar from "../../Components/common/Navbar";
 import { authService } from "../../api/auth.service";
-import { Mail, Lock, LogIn } from "lucide-react";
-import { InputField } from "../../Components/common/InputFeild";
+import {
+  Lock,
+  LogIn,
+  Mail,
+  CheckCircle2,
+  Code2,
+  Trophy,
+  LineChart,
+} from "lucide-react";
+
+function AuthField({ id, label, icon: Icon, ...props }) {
+  return (
+    <div>
+      <label htmlFor={id} className="mb-2 block text-sm font-bold text-slate-800">
+        {label}
+      </label>
+      <div className="flex items-center rounded-xl border border-slate-200 bg-white px-3 transition focus-within:border-emerald-400 focus-within:ring-4 focus-within:ring-emerald-500/10">
+        <Icon className="mr-3 h-5 w-5 text-slate-400" />
+        <input
+          id={id}
+          className="min-h-[48px] w-full border-0 bg-transparent text-sm font-semibold text-slate-900 outline-none placeholder:text-slate-400"
+          {...props}
+        />
+      </div>
+    </div>
+  );
+}
 
 function Login() {
   const [email, setEmail] = useState("");
@@ -13,7 +38,9 @@ function Login() {
   const [isLoading, setIsLoading] = useState(false);
 
   const navigate = useNavigate();
+  const location = useLocation();
   const { setUser } = useUserContext();
+  const successMessage = location.state?.message;
 
   const login = async (e) => {
     e.preventDefault();
@@ -29,143 +56,161 @@ function Login() {
         }
         navigate("/courses");
       } else {
-        setError(result.error || "Login failed. Please try again.");
+        setError(result.error || "Đăng nhập thất bại. Vui lòng kiểm tra lại email và mật khẩu.");
       }
     } catch (error) {
       console.error("Login error:", error);
-      setError("An unexpected error occurred. Please try again.");
+      setError("Có lỗi xảy ra khi đăng nhập. Vui lòng thử lại sau.");
     } finally {
       setIsLoading(false);
     }
   };
 
-
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50">
+    <div className="min-h-screen bg-[#f6faf8] font-sans text-slate-900">
       <Navbar />
-      <div className="flex items-center justify-center py-8 px-4 sm:px-6 lg:px-8">
-        <div className="max-w-md w-full space-y-4">
-          <div className="text-center">
-            <div className="mx-auto h-14 w-14 bg-gradient-primary rounded-full flex items-center justify-center mb-4 shadow-lg">
-              <LogIn className="h-8 w-8 text-white" />
-            </div>
-            <h2 className="text-4xl font-bold text-gray-900 mb-2">Welcome Back!</h2>
-            <p className="text-gray-600">Sign in to your account to continue</p>
-          </div>
+      <main className="px-4 py-10 sm:px-6 lg:px-8">
+        <div className="mx-auto grid max-w-6xl overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-soft-lg lg:grid-cols-[0.95fr_1.05fr]">
+          {/* ===== Left: brand panel ===== */}
+          <section className="relative overflow-hidden bg-[#070b14] p-8 text-white sm:p-10 lg:p-12">
+            <div className="mesh-animated absolute inset-0 animate-gradient-shift bg-mesh-hero opacity-90" />
+            <div className="absolute inset-0 bg-grid-dark opacity-50" />
+            <div className="aurora-blob left-[-10%] top-[-10%] h-64 w-64 bg-emerald-500/40" />
+            <div className="aurora-blob right-[-10%] bottom-[-10%] h-72 w-72 bg-violet-500/30" style={{ animationDelay: "-5s" }} />
 
-          <div className="bg-white shadow-2xl rounded-2xl p-8 border border-gray-100">
-            <form autoComplete="off" onSubmit={login} className="space-y-6">
-              <InputField
+            <div className="relative">
+              <Link to="/" className="inline-flex items-center gap-2.5 no-underline">
+                <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-emerald-500 to-teal-500 text-sm font-black text-white shadow-md">
+                  {"</>"}
+                </div>
+                <span className="font-display text-xl font-extrabold tracking-tight text-white">
+                  Code<span className="text-emerald-400">Learn</span>
+                </span>
+              </Link>
+
+              <h1 className="mt-10 font-display text-3xl font-extrabold leading-tight sm:text-4xl">
+                Tiếp tục lộ trình
+                <br />
+                <span className="text-gradient bg-gradient-to-r from-emerald-400 via-sky-400 to-violet-400">
+                  học lập trình của bạn
+                </span>
+              </h1>
+              <p className="mt-4 max-w-md text-base leading-7 text-slate-300">
+                Truy cập khóa học đã đăng ký, theo dõi tiến độ, làm quiz và nhận chứng chỉ khi hoàn thành.
+              </p>
+
+              <div className="mt-10 grid gap-3">
+                {[
+                  { icon: Code2, text: "Khóa học Frontend, Backend, Data, DevOps" },
+                  { icon: LineChart, text: "Theo dõi tiến độ học từng bài" },
+                  { icon: Trophy, text: "Chứng chỉ hoàn thành & dashboard admin" },
+                ].map(({ icon: Icon, text }) => (
+                  <div
+                    key={text}
+                    className="flex items-center gap-3 rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-sm font-semibold text-slate-200 backdrop-blur"
+                  >
+                    <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-emerald-500/20 text-emerald-300">
+                      <Icon size={16} />
+                    </span>
+                    {text}
+                  </div>
+                ))}
+              </div>
+            </div>
+          </section>
+
+          {/* ===== Right: form ===== */}
+          <section className="p-6 sm:p-10 lg:p-12">
+            <div className="mb-8">
+              <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-to-br from-emerald-500 to-teal-500 text-white shadow-lg">
+                <LogIn className="h-6 w-6" />
+              </div>
+              <h2 className="m-0 font-display text-3xl font-extrabold text-slate-900">Chào mừng trở lại</h2>
+              <p className="m-0 mt-2 text-sm font-medium text-slate-500">
+                Dùng email và mật khẩu đã đăng ký để vào hệ thống.
+              </p>
+            </div>
+
+            {successMessage && (
+              <div className="mb-5 flex items-center gap-2 rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm font-bold text-emerald-700">
+                <CheckCircle2 size={16} />
+                {successMessage}
+              </div>
+            )}
+
+            <form autoComplete="off" onSubmit={login} className="space-y-5">
+              <AuthField
                 id="email"
                 name="email"
                 type="email"
-                label="Email Address"
+                label="Email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required
-                placeholder="Enter your email address"
-                icon={<Mail className="h-5 w-5 text-gray-500" />}
+                placeholder="admin@gmail.com"
+                icon={Mail}
               />
 
-              <InputField
+              <AuthField
                 id="password"
                 name="password"
                 type="password"
-                label="Password"
+                label="Mật khẩu"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 required
-                placeholder="Enter your password"
-                icon={<Lock className="h-5 w-5 text-gray-500" />}
+                placeholder="Nhập mật khẩu"
+                icon={Lock}
               />
 
-              <div className="flex items-center justify-end">
-                <Link
-                  to="/forgot-password"
-                  className="text-sm text-blue-600 hover:text-blue-700 transition-colors"
-                >
-                  Forgot your password?
+              <div className="flex items-center justify-between gap-3 text-sm">
+                <label className="flex items-center gap-2 font-semibold text-slate-500">
+                  <input type="checkbox" className="h-4 w-4 rounded border-slate-300 accent-emerald-500" />
+                  Ghi nhớ đăng nhập
+                </label>
+                <Link to="/forgot-password" className="font-bold text-emerald-600 transition hover:text-emerald-700">
+                  Quên mật khẩu?
                 </Link>
               </div>
 
               {error && (
-                <div className="bg-red-50 border border-red-200 rounded-lg p-1">
-                  <p className="text-red-800 text-sm font-medium">{error}</p>
+                <div className="rounded-xl border border-rose-200 bg-rose-50 px-4 py-3">
+                  <p className="m-0 text-sm font-bold text-rose-700">{error}</p>
                 </div>
               )}
 
               <button
                 type="submit"
                 disabled={isLoading}
-                className={`w-full py-4 px-6 rounded-lg font-semibold text-lg transition-all duration-200 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 focus:outline-none focus:ring-4 focus:ring-blue-300 ${isLoading
-                  ? "bg-gray-400 text-gray-200 cursor-not-allowed"
-                  : "bg-gradient-to-r from-blue-600 to-purple-600 text-white hover:from-blue-700 hover:to-purple-700"
-                  }`}
+                className={`group relative inline-flex w-full items-center justify-center gap-2 overflow-hidden rounded-xl px-6 py-3.5 text-sm font-bold transition focus:outline-none focus:ring-4 focus:ring-emerald-500/20 ${
+                  isLoading
+                    ? "cursor-not-allowed bg-slate-400 text-white"
+                    : "bg-gradient-to-r from-emerald-500 to-teal-500 text-white shadow-glow-emerald"
+                }`}
               >
-                {isLoading ? (
-                  <div className="flex items-center justify-center">
-                    <svg
-                      className="animate-spin -ml-1 mr-3 h-5 w-5 text-white"
-                      xmlns="http://www.w3.org/2000/svg"
-                      fill="none"
-                      viewBox="0 0 24 24"
-                    >
-                      <circle
-                        className="opacity-25"
-                        cx="12"
-                        cy="12"
-                        r="10"
-                        stroke="currentColor"
-                        strokeWidth="4"
-                      ></circle>
-                      <path
-                        className="opacity-75"
-                        fill="currentColor"
-                        d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-                      ></path>
-                    </svg>
-                    Signing In...
-                  </div>
-                ) : (
-                  "Sign In"
+                {!isLoading && (
+                  <span className="absolute inset-0 -translate-x-full bg-gradient-to-r from-transparent via-white/30 to-transparent transition-transform duration-700 group-hover:translate-x-full" />
                 )}
+                {isLoading ? "Đang đăng nhập..." : "Đăng nhập"}
               </button>
             </form>
 
-            <div className="mt-8">
-              <div className="relative">
-                <div className="absolute inset-0 flex items-center">
-                  <div className="w-full border-t border-gray-300" />
-                </div>
-                <div className="relative flex justify-center text-sm">
-                  <span className="px-4 bg-white text-gray-500">New to our platform?</span>
-                </div>
-              </div>
-
-              <div className="mt-6 text-center">
-                <p className="text-gray-600">
-                  Don't have an account?{" "}
-                  <Link
-                    to="/register"
-                    className="text-blue-600 font-semibold hover:text-blue-700 transition-colors"
-                  >
-                    Create account here
-                  </Link>
-                </p>
-              </div>
+            <div className="mt-8 rounded-xl border border-slate-200 bg-slate-50 px-4 py-4 text-center text-sm font-semibold text-slate-500">
+              Chưa có tài khoản?{" "}
+              <Link to="/register" className="font-bold text-emerald-600 transition hover:text-emerald-700">
+                Tạo tài khoản học tập
+              </Link>
             </div>
-          </div>
 
-          <div className="text-center">
-            <p className="text-sm text-gray-500">
-              By signing in, you agree to our{" "}
-              <a href="#" className="text-blue-600 hover:text-blue-700 transition-colors">Terms of Service</a>
-              {" "}and{" "}
-              <a href="#" className="text-blue-600 hover:text-blue-700 transition-colors">Privacy Policy</a>
+            <p className="mt-5 text-center text-xs font-medium leading-6 text-slate-400">
+              Khi đăng nhập, bạn đồng ý với{" "}
+              <Link to="/terms" className="font-bold text-emerald-600">Điều khoản sử dụng</Link>
+              {" "}và{" "}
+              <Link to="/privacy" className="font-bold text-emerald-600">Chính sách bảo mật</Link>.
             </p>
-          </div>
+          </section>
         </div>
-      </div>
+      </main>
     </div>
   );
 }
