@@ -3,6 +3,7 @@ import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useUserContext } from "../../contexts/UserContext";
 import Navbar from "../../Components/common/Navbar";
 import { authService } from "../../api/auth.service";
+import GoogleSignInButton from "./GoogleSignInButton";
 import {
   Lock,
   LogIn,
@@ -64,6 +65,22 @@ function Login() {
     } finally {
       setIsLoading(false);
     }
+  };
+
+  const handleGoogleCredential = async (credential) => {
+    setIsLoading(true);
+    setError("");
+
+    const result = await authService.googleLogin(credential);
+    if (result.success) {
+      if (result.user) {
+        setUser(result.user);
+      }
+      navigate("/courses");
+    } else {
+      setError(result.error || "Đăng nhập Google thất bại.");
+    }
+    setIsLoading(false);
   };
 
   return (
@@ -194,6 +211,17 @@ function Login() {
                 {isLoading ? "Đang đăng nhập..." : "Đăng nhập"}
               </button>
             </form>
+
+            <div className="my-6 flex items-center gap-3 text-xs font-bold uppercase tracking-wide text-slate-400">
+              <span className="h-px flex-1 bg-slate-200" />
+              hoặc
+              <span className="h-px flex-1 bg-slate-200" />
+            </div>
+
+            <GoogleSignInButton
+              onSuccess={handleGoogleCredential}
+              onError={setError}
+            />
 
             <div className="mt-8 rounded-xl border border-slate-200 bg-slate-50 px-4 py-4 text-center text-sm font-semibold text-slate-500">
               Chưa có tài khoản?{" "}

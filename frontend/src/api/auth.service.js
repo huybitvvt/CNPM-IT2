@@ -1,5 +1,20 @@
 import { API_BASE_URL } from "./constant";
 
+function saveSession(jwtData) {
+  localStorage.setItem("token", jwtData.token);
+  localStorage.setItem("email", jwtData.email);
+  localStorage.setItem("name", jwtData.name);
+  localStorage.setItem("id", jwtData.id);
+  localStorage.setItem("role", jwtData.role);
+
+  return {
+    id: jwtData.id,
+    name: jwtData.name,
+    email: jwtData.email,
+    role: jwtData.role,
+  };
+}
+
 async function login(email, password) {
   try {
     const response = await fetch(`${API_BASE_URL}/api/auth/login`, {
@@ -14,22 +29,12 @@ async function login(email, password) {
 
     if (response.ok) {
       const jwtData = result.data;
-
-      localStorage.setItem("token", jwtData.token);
-      localStorage.setItem("email", jwtData.email);
-      localStorage.setItem("name", jwtData.name);
-      localStorage.setItem("id", jwtData.id);
-      localStorage.setItem("role", jwtData.role);
+      const user = saveSession(jwtData);
 
       return {
         success: true,
         token: jwtData.token,
-        user: {
-          id: jwtData.id,
-          name: jwtData.name,
-          email: jwtData.email,
-          role: jwtData.role,
-        },
+        user,
       };
     } else {
       const message = result.message || result.error || "Login failed";
@@ -49,6 +54,39 @@ async function login(email, password) {
   }
 }
 
+async function googleLogin(credential) {
+  try {
+    const response = await fetch(`${API_BASE_URL}/api/auth/google`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ credential }),
+    });
+
+    const result = await response.json();
+    if (response.ok) {
+      const user = saveSession(result.data);
+      return {
+        success: true,
+        token: result.data.token,
+        user,
+      };
+    }
+
+    return {
+      success: false,
+      error: result.message || result.error || "Đăng nhập Google thất bại.",
+    };
+  } catch (error) {
+    console.error("Google login error:", error);
+    return {
+      success: false,
+      error: "Không kết nối được máy chủ. Vui lòng thử lại.",
+    };
+  }
+}
+
 async function register(formData) {
   try {
     const response = await fetch(`${API_BASE_URL}/api/auth/register`, {
@@ -59,16 +97,16 @@ async function register(formData) {
       body: JSON.stringify(formData),
     });
 
+    const data = await response.json();
     if (response.ok) {
       return {
         success: true,
-        message: "Registration successful",
+        message: data.message || "Tạo tài khoản thành công. Vui lòng kiểm tra Gmail để xác thực tài khoản.",
       };
     } else {
-      const data = await response.json();
       return {
         success: false,
-        error: data.error || "Registration failed",
+        error: data.message || data.error || "Registration failed",
       };
     }
   } catch (error) {
@@ -119,6 +157,22 @@ async function resetPassword(token, newPassword) {
       : { success: false, error: data.message || data.error || "Không đặt lại được mật khẩu." };
   } catch (error) {
     console.error("Reset password error:", error);
+    return {
+      success: false,
+      error: "Không kết nối được máy chủ. Vui lòng thử lại.",
+    };
+  }
+}
+
+async function verifyEmail(token) {
+  try {
+    const response = await fetch(`${API_BASE_URL}/api/auth/verify-email?token=${encodeURIComponent(token)}`);
+    const data = await response.json();
+    return response.ok
+      ? { success: true, message: data.message }
+      : { success: false, error: data.message || data.error || "Không xác thực được tài khoản." };
+  } catch (error) {
+    console.error("Verify email error:", error);
     return {
       success: false,
       error: "Không kết nối được máy chủ. Vui lòng thử lại.",
@@ -206,9 +260,11 @@ function getAuthHeader() {
 
 export const authService = {
   login,
+  googleLogin,
   register,
   forgotPassword,
   resetPassword,
+  verifyEmail,
   getUserDetails,
   logout,
   isAdminAuthenticated,

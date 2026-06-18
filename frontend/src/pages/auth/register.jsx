@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import Navbar from "../../Components/common/Navbar";
 import { authService } from "../../api/auth.service";
+import GoogleSignInButton from "./GoogleSignInButton";
 import {
   Briefcase,
   Calendar,
@@ -79,7 +80,7 @@ function RegistrationForm() {
 
       if (result.success) {
         navigate("/login", {
-          state: { message: "Tạo tài khoản thành công. Vui lòng đăng nhập để tiếp tục." },
+          state: { message: result.message || "Tạo tài khoản thành công. Vui lòng kiểm tra Gmail để xác thực tài khoản." },
         });
       } else {
         setError(result.error || "Tạo tài khoản thất bại. Vui lòng kiểm tra lại thông tin.");
@@ -90,6 +91,19 @@ function RegistrationForm() {
     } finally {
       setIsLoading(false);
     }
+  };
+
+  const handleGoogleCredential = async (credential) => {
+    setIsLoading(true);
+    setError("");
+
+    const result = await authService.googleLogin(credential);
+    if (result.success) {
+      navigate("/courses");
+    } else {
+      setError(result.error || "Đăng ký bằng Google thất bại.");
+    }
+    setIsLoading(false);
   };
 
   return (
@@ -130,6 +144,18 @@ function RegistrationForm() {
             <div className="grid gap-8">
               <section className="grid gap-5">
                 <SectionTitle index="1" title="Thông tin đăng nhập" subtitle="Các trường bắt buộc để hệ thống xác thực người dùng." />
+                <div className="grid gap-4 rounded-2xl border border-slate-100 bg-slate-50 p-4">
+                  <GoogleSignInButton
+                    text="signup_with"
+                    onSuccess={handleGoogleCredential}
+                    onError={setError}
+                  />
+                  <div className="flex items-center gap-3 text-xs font-bold uppercase tracking-wide text-slate-400">
+                    <span className="h-px flex-1 bg-slate-200" />
+                    hoặc điền thông tin
+                    <span className="h-px flex-1 bg-slate-200" />
+                  </div>
+                </div>
                 <div className="grid grid-cols-1 gap-5 lg:grid-cols-2">
                   <FormField id="username" name="username" value={formData.username} onChange={handleChange} icon={User} label="Họ và tên" required placeholder="Nguyễn Văn A" />
                   <FormField id="email" name="email" type="email" value={formData.email} onChange={handleChange} icon={Mail} label="Email" required placeholder="you@example.com" />

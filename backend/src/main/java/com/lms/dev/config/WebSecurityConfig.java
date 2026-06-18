@@ -55,6 +55,7 @@ public class WebSecurityConfig {
                         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                         // Public endpoints
                         .requestMatchers("/api/auth/**").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/api/payments/sepay-webhook").permitAll()
                         .requestMatchers("/error").permitAll()
                         .requestMatchers("/swagger-ui/**", "/v3/api-docs/**").permitAll()
 
@@ -71,6 +72,7 @@ public class WebSecurityConfig {
                         .requestMatchers("/api/feedbacks/**").hasAnyRole("USER", "ADMIN")
                         .requestMatchers("/api/learning/**").hasAnyRole("USER", "ADMIN")
                         .requestMatchers("/api/progress/**").hasAnyRole("USER", "ADMIN")
+                        .requestMatchers("/api/payments/**").hasAnyRole("USER", "ADMIN")
                         .requestMatchers("/api/ai-chat/**").hasAnyRole("USER", "ADMIN")
                         .requestMatchers("/api/questions/**").hasAnyRole("USER", "ADMIN")
 

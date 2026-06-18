@@ -4,6 +4,7 @@ import com.lms.dev.entity.User;
 import com.lms.dev.repository.UserRepository;
 import com.lms.dev.security.UserPrincipal;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.authentication.DisabledException;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -22,6 +23,9 @@ public class CustomUserDetailsService implements UserDetailsService {
         User user = userRepository.findByEmail(email);
         if (user == null) {
             throw new UsernameNotFoundException("User not found with email: " + email);
+        }
+        if (!Boolean.TRUE.equals(user.getIsActive())) {
+            throw new DisabledException("User account is not verified");
         }
         return UserPrincipal.create(user);
     }

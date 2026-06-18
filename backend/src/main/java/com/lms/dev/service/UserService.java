@@ -41,6 +41,22 @@ public class UserService {
             throw new IllegalArgumentException("Mật khẩu không được để trống.");
         }
         user.setPassword(passwordEncoder.encode(user.getPassword()));
+        if (user.getIsActive() == null) {
+            user.setIsActive(true);
+        }
+        return userRepository.save(user);
+    }
+
+    public User createUnverifiedUser(User user) {
+        if (user.getPassword() == null || user.getPassword().isBlank()) {
+            throw new IllegalArgumentException("Mật khẩu không được để trống.");
+        }
+        user.setPassword(passwordEncoder.encode(user.getPassword()));
+        user.setIsActive(false);
+        return userRepository.save(user);
+    }
+
+    public User saveUser(User user) {
         return userRepository.save(user);
     }
 

@@ -1,5 +1,13 @@
-if (Test-Path -LiteralPath ".\.env.local.ps1") {
-    . .\.env.local.ps1
+if (Test-Path -LiteralPath ".\.env.local") {
+    Get-Content -LiteralPath ".\.env.local" | ForEach-Object {
+        $line = $_.Trim()
+        if (-not $line -or $line.StartsWith("#") -or -not $line.Contains("=")) {
+            return
+        }
+
+        $key, $value = $line.Split("=", 2)
+        [Environment]::SetEnvironmentVariable($key.Trim(), $value, "Process")
+    }
 }
 
 $env:JAVA_HOME = "E:\Apache NetBeans\jdk"

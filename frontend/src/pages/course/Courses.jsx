@@ -3,7 +3,7 @@ import Navbar from "../../Components/common/Navbar";
 import Footer from "../../Components/common/Footer";
 import { Reveal } from "../../Components/common/Reveal";
 import { useNavigate } from "react-router-dom";
-import { message } from "antd";
+import { message, Modal } from "antd";
 import { courseService } from "../../api/course.service";
 import { learningService } from "../../api/learning.service";
 import {
@@ -16,7 +16,11 @@ import {
   UserRound,
   Sparkles,
   X,
+  Copy,
+  QrCode,
 } from "lucide-react";
+
+const COURSE_PRICE = 2000;
 
 const formatCurrency = (value) =>
   new Intl.NumberFormat("vi-VN", {
@@ -54,6 +58,9 @@ function Courses() {
   const [categoryFilter, setCategoryFilter] = useState("all");
   const [levelFilter, setLevelFilter] = useState("all");
   const [displayCount, setDisplayCount] = useState(6);
+  const [paymentModalOpen, setPaymentModalOpen] = useState(false);
+  const [activePayment, setActivePayment] = useState(null);
+  const [paymentLoading, setPaymentLoading] = useState(false);
 
   const userId = localStorage.getItem("id");
   const authToken = localStorage.getItem("token");
@@ -122,19 +129,51 @@ function Courses() {
   const hasActiveFilters =
     searchTerm || categoryFilter !== "all" || levelFilter !== "all" || filterBy !== "all";
 
-  const enrollCourse = async (courseId) => {
+  useEffect(() => {
+    if (!paymentModalOpen || !activePayment?.paymentId || activePayment.status === "PAID") {
+      return undefined;
+    }
+
+    const intervalId = setInterval(async () => {
+      const res = await learningService.getPayment(activePayment.paymentId);
+      if (res.success) {
+        setActivePayment(res.data);
+        if (res.data.status === "PAID") {
+          setEnrolled((prev) => [...new Set([...prev, res.data.courseId])]);
+          message.success("Thanh toán thành công. Khóa học đã được mở.");
+          clearInterval(intervalId);
+        }
+      }
+    }, 4000);
+
+    return () => clearInterval(intervalId);
+  }, [activePayment?.paymentId, activePayment?.status, paymentModalOpen]);
+
+  const startPayment = async (courseId) => {
     if (!authToken) {
-      message.error("Bạn cần đăng nhập để đăng ký khóa học");
+      message.error("Bạn cần đăng nhập để thanh toán khóa học");
       setTimeout(() => navigate("/login"), 1200);
       return;
     }
 
-    const res = await learningService.enrollCourse(userId, courseId);
-    if (res.success && res.data === "Enrolled successfully") {
-      message.success("Đăng ký khóa học thành công");
-      setTimeout(() => navigate(`/course/${courseId}`), 1000);
-    } else if (!res.success) {
-      message.error(res.error || "Không thể đăng ký khóa học");
+    setPaymentLoading(true);
+    const res = await learningService.createCoursePayment(userId, courseId);
+    setPaymentLoading(false);
+
+    if (res.success) {
+      setActivePayment(res.data);
+      setPaymentModalOpen(true);
+    } else {
+      message.error(res.error || "Không tạo được đơn thanh toán");
+    }
+  };
+
+  const copyPaymentText = async (text) => {
+    try {
+      await navigator.clipboard.writeText(text);
+      message.success("Đã sao chép");
+    } catch {
+      message.error("Không sao chép được");
     }
   };
 
@@ -296,7 +335,7 @@ function Courses() {
                             {category}
                           </span>
                           <span className="absolute right-3 top-3 rounded-full bg-white/95 px-3 py-1 text-[11px] font-black text-slate-900 shadow-sm backdrop-blur">
-                            {formatCurrency(course.price)}
+                            {formatCurrency(COURSE_PRICE)}
                           </span>
                         </div>
 
@@ -338,10 +377,11 @@ function Courses() {
                             ) : (
                               <button
                                 type="button"
-                                onClick={() => enrollCourse(course.course_id)}
+                                onClick={() => startPayment(course.course_id)}
+                                disabled={paymentLoading}
                                 className="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-slate-900 py-3 font-bold text-white transition hover:bg-gradient-to-r hover:from-emerald-500 hover:to-teal-500"
                               >
-                                Đăng ký học
+                                Thanh toán 2.000đ
                                 <ArrowRight size={15} className="transition-transform group-hover:translate-x-1" />
                               </button>
                             )}
@@ -369,6 +409,88 @@ function Courses() {
           )}
         </section>
       </main>
+
+      <Modal
+        title="Thanh toán khóa học"
+        open={paymentModalOpen}
+        onCancel={() => setPaymentModalOpen(false)}
+        footer={null}
+        width={560}
+      >
+        {activePayment && (
+          <div className="grid gap-5 text-left">
+            <div className="rounded-xl border border-emerald-100 bg-emerald-50 p-4 text-sm font-semibold text-emerald-800">
+              Chuyển khoản đúng số tiền và nội dung bên dưới. Hệ thống sẽ tự mở khóa học sau khi SePay xác nhận giao dịch.
+            </div>
+
+            <div className="grid gap-4 md:grid-cols-[220px_1fr]">
+              <div className="flex items-center justify-center rounded-xl border border-slate-200 bg-white p-3">
+                {activePayment.qrUrl ? (
+                  <img src={activePayment.qrUrl} alt="QR thanh toán khóa học" className="h-48 w-48 object-contain" />
+                ) : (
+                  <QrCode className="h-24 w-24 text-slate-300" />
+                )}
+              </div>
+
+              <div className="grid gap-3 text-sm">
+                <div>
+                  <p className="m-0 text-xs font-bold uppercase text-slate-400">Khóa học</p>
+                  <p className="m-0 mt-1 font-bold text-slate-900">{activePayment.courseName}</p>
+                </div>
+                <div>
+                  <p className="m-0 text-xs font-bold uppercase text-slate-400">Số tiền</p>
+                  <p className="m-0 mt-1 text-xl font-black text-emerald-700">{formatCurrency(activePayment.amount)}</p>
+                </div>
+                <div>
+                  <p className="m-0 text-xs font-bold uppercase text-slate-400">Tài khoản</p>
+                  <p className="m-0 mt-1 font-bold text-slate-900">
+                    {activePayment.bankCode} - {activePayment.bankAccount}
+                  </p>
+                  <p className="m-0 text-xs font-semibold text-slate-500">{activePayment.accountName}</p>
+                </div>
+              </div>
+            </div>
+
+            <div className="rounded-xl border border-slate-200 bg-slate-50 p-4">
+              <div className="mb-2 flex items-center justify-between gap-3">
+                <p className="m-0 text-xs font-bold uppercase text-slate-400">Nội dung chuyển khoản</p>
+                <button
+                  type="button"
+                  onClick={() => copyPaymentText(activePayment.transferContent)}
+                  className="inline-flex items-center gap-1 rounded-lg border border-slate-200 bg-white px-2 py-1 text-xs font-bold text-slate-600 hover:text-emerald-700"
+                >
+                  <Copy size={13} />
+                  Sao chép
+                </button>
+              </div>
+              <p className="m-0 rounded-lg bg-white px-3 py-2 font-mono text-lg font-black tracking-wide text-slate-900">
+                {activePayment.transferContent}
+              </p>
+            </div>
+
+            <div className={`rounded-xl px-4 py-3 text-sm font-bold ${
+              activePayment.status === "PAID"
+                ? "border border-emerald-200 bg-emerald-50 text-emerald-700"
+                : "border border-amber-200 bg-amber-50 text-amber-700"
+            }`}>
+              {activePayment.status === "PAID"
+                ? "Đã thanh toán. Bạn có thể vào lớp học."
+                : "Đang chờ thanh toán. Modal sẽ tự cập nhật sau khi webhook SePay báo về."}
+            </div>
+
+            {activePayment.status === "PAID" && (
+              <button
+                type="button"
+                onClick={() => navigate(`/course/${activePayment.courseId}`)}
+                className="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-emerald-600 py-3 font-bold text-white transition hover:bg-emerald-700"
+              >
+                Vào lớp học
+                <ArrowRight size={15} />
+              </button>
+            )}
+          </div>
+        )}
+      </Modal>
 
       <Footer />
     </div>
