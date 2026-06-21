@@ -18,13 +18,14 @@ import {
   faSpinner
 } from "@fortawesome/free-solid-svg-icons";
 import { faLinkedin, faTwitter, faFacebook } from "@fortawesome/free-brands-svg-icons";
-import img from '../../assets/images/logo.jpg';
 import seal from '../../assets/images/seal.png';
 import { courseService } from "../../api/course.service";
 import { profileService } from "../../api/profile.service";
+import { assessmentService } from "../../api/assessment.service";
 
 const Certificate = () => {
   const [userDetails, setUserDetails] = useState(null);
+  const [completionRecord, setCompletionRecord] = useState(null);
   const [loading, setLoading] = useState(true);
   const [pdfDownloading, setPdfDownloading] = useState(false);
   const [showConfetti, setShowConfetti] = useState(false);
@@ -41,7 +42,9 @@ const Certificate = () => {
     description: "",
   });
 
-  const certificateNumber = `CERT-${courseId}-${userId}-${Date.now().toString().slice(-6)}`;
+  const certificateNumber = userId && courseId
+    ? `CERT-${courseId.slice(0, 8).toUpperCase()}-${userId.slice(0, 8).toUpperCase()}`
+    : "CERT-PENDING";
   const currentDate = new Date().toLocaleDateString("en-US", {
     year: "numeric",
     month: "long",
@@ -57,9 +60,10 @@ const Certificate = () => {
     const fetchData = async () => {
       setLoading(true);
       try {
-        const [userRes, courseRes] = await Promise.all([
+        const [userRes, courseRes, assessmentRes] = await Promise.all([
           profileService.getUserDetails(userId),
-          courseService.getCourseById(courseId)
+          courseService.getCourseById(courseId),
+          assessmentService.getAssessmentsByUserAndCourse(userId, courseId)
         ]);
 
         if (userRes.success) {
@@ -73,6 +77,21 @@ const Certificate = () => {
         } else {
           throw new Error("Failed to fetch course details");
         }
+
+        if (!assessmentRes.success) {
+          throw new Error("Failed to fetch assessment result");
+        }
+
+        const completedAssessment = Array.isArray(assessmentRes.data)
+          ? assessmentRes.data.find((assessment) => Number(assessment.marks) > 0)
+          : null;
+
+        if (!completedAssessment) {
+          setError("You need to complete this course assessment before generating a certificate.");
+          return;
+        }
+
+        setCompletionRecord(completedAssessment);
 
         // Show confetti after data loads
         setTimeout(() => setShowConfetti(true), 500);
@@ -233,16 +252,22 @@ const Certificate = () => {
             <div className="relative p-16 text-center">
               {/* Logo */}
               <div className="mb-8">
-                <img
-                  src={img}
-                  alt="Institution Logo"
-                  className="w-48 h-14 mx-auto rounded-full shadow-lg bg-white p-1"
-                />
+                <div className="mx-auto inline-flex items-center gap-3 rounded-2xl bg-white px-5 py-3 shadow-lg ring-1 ring-emerald-100">
+                  <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-gradient-to-br from-emerald-500 to-teal-500 text-sm font-black text-white">
+                    {"</>"}
+                  </div>
+                  <div className="text-left">
+                    <p className="m-0 text-2xl font-black tracking-tight" style={{ color: "#0f172a" }}>
+                      Code<span className="text-emerald-600">Path</span>
+                    </p>
+                    <p className="m-0 text-xs font-bold uppercase tracking-[0.22em] text-slate-400">LMS</p>
+                  </div>
+                </div>
               </div>
 
               {/* Certificate Title */}
               <div className="mb-8">
-                <h1 className="text-5xl font-bold text-transparent bg-gradient-to-r from-yellow-600 via-yellow-500 to-orange-500 bg-clip-text mb-4">
+                <h1 className="mb-4 text-5xl font-bold" style={{ color: "#b45309" }}>
                   Certificate of Achievement
                 </h1>
                 <div className="flex items-center justify-center gap-2 mb-4">
@@ -258,7 +283,7 @@ const Certificate = () => {
                   This is to proudly certify that
                 </p>
                 
-                <h2 className="text-4xl font-bold text-transparent bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text py-2">
+                <h2 className="py-2 text-4xl font-bold" style={{ color: "#4f46e5" }}>
                   {userDetails?.username || "Student"}
                 </h2>
                 
@@ -267,7 +292,7 @@ const Certificate = () => {
                 </p>
                 
                 <div className="bg-gradient-to-r from-green-50 to-emerald-50 rounded-2xl p-6 mx-auto max-w-2xl border border-green-200">
-                  <h3 className="text-3xl font-bold text-transparent bg-gradient-to-r from-green-600 to-emerald-600 bg-clip-text">
+                  <h3 className="text-3xl font-bold" style={{ color: "#047857" }}>
                     {course?.course_name?.length > 50 
                       ? course?.course_name 
                       : `${course?.course_name} - Complete Course`}
@@ -296,6 +321,14 @@ const Certificate = () => {
                     <p className="text-lg font-bold text-gray-800">{certificateNumber}</p>
                   </div>
                 </div>
+
+                <div className="flex items-center gap-3 mt-4 sm:mt-0">
+                  <FontAwesomeIcon icon={faAward} className="text-green-600 text-xl" />
+                  <div>
+                    <p className="text-sm text-gray-500 font-medium">Assessment Score</p>
+                    <p className="text-lg font-bold text-gray-800">{completionRecord?.marks ?? 0}%</p>
+                  </div>
+                </div>
               </div>
 
               {/* Signature and Seal */}
@@ -308,7 +341,7 @@ const Certificate = () => {
                   />
                   <div className="border-t-2 border-gray-400 pt-2 w-48">
                     <p className="text-lg font-semibold text-gray-800">Authorized Signature</p>
-                    <p className="text-sm text-gray-600">Learning Platform</p>
+                    <p className="text-sm text-gray-600">CodePath LMS</p>
                   </div>
                 </div>
               </div>

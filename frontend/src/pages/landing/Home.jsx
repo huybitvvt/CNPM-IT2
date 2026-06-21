@@ -148,7 +148,7 @@ const CODE_LINES = [
   [
     { t: "greet", c: "text-sky-300" },
     { t: "(", c: "text-slate-300" },
-    { t: '"CodeLearner"', c: "text-amber-300" },
+    { t: '"CodePathLearner"', c: "text-amber-300" },
     { t: ")", c: "text-slate-300" },
   ],
 ];
@@ -215,7 +215,7 @@ function CodeEditorMock() {
         {/* output console */}
         <div className="border-t border-white/10 bg-black/30 px-4 py-3 font-mono text-[12px]">
           <p className="m-0 text-slate-500">$ python main.py</p>
-          <p className="m-0 mt-1 text-emerald-300">Xin chào, CodeLearner!</p>
+          <p className="m-0 mt-1 text-emerald-300">Xin chào, CodePathLearner!</p>
         </div>
       </div>
 
@@ -363,7 +363,7 @@ function Home() {
             </Reveal>
 
             <Reveal as="p" delay={160} className="mt-6 max-w-xl text-lg leading-8 text-slate-300">
-              CodeLearn giúp bạn học qua bài giảng video, quiz đánh giá và dự án
+              CodePath giúp bạn học qua bài giảng video, quiz đánh giá và dự án
               thực tế. Theo dõi tiến độ, nhận chứng chỉ và tiến bộ mỗi ngày.
             </Reveal>
 
@@ -522,7 +522,7 @@ function Home() {
 
                         <div className="mt-4 flex items-center gap-2 text-sm text-slate-500">
                           <UserRound size={15} className="text-sky-500" />
-                          <span className="truncate">{course.instructor || "CodeLearn"}</span>
+                          <span className="truncate">{course.instructor || "CodePath"}</span>
                         </div>
 
                         <span className="mt-5 inline-flex items-center justify-center gap-2 rounded-xl bg-slate-900 py-3 text-sm font-bold text-white transition group-hover:bg-gradient-to-r group-hover:from-emerald-500 group-hover:to-teal-500">
@@ -545,7 +545,7 @@ function Home() {
           <Reveal className="mb-12 flex flex-col items-start justify-between gap-4 md:flex-row md:items-end">
             <div className="max-w-2xl text-left">
               <p className="mb-3 text-sm font-bold uppercase tracking-[0.2em] text-emerald-600">
-                Vì sao chọn CodeLearn
+                Vì sao chọn CodePath
               </p>
               <h2 className="font-display text-3xl font-extrabold tracking-tight text-slate-900 sm:text-4xl">
                 Trải nghiệm học lập trình hiện đại
@@ -693,7 +693,7 @@ function Home() {
               Biến thời gian rảnh thành kỹ năng lập trình thực thụ
             </h2>
             <p className="mx-auto mt-4 max-w-xl text-slate-300">
-              Tham gia cùng cộng đồng học viên đang xây dựng tương lai với CodeLearn.
+              Tham gia cùng cộng đồng học viên đang xây dựng tương lai với CodePath.
             </p>
             <div className="mt-9 flex flex-wrap items-center justify-center gap-4">
               <MagneticButton

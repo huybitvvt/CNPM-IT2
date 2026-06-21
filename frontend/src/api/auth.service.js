@@ -230,8 +230,7 @@ async function logout() {
   } catch (error) {
     console.error("Logout error:", error);
   } finally {
-    localStorage.clear()
-    window.location.href = "/login";
+    localStorage.clear();
   }
 }
 

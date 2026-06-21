@@ -24,7 +24,6 @@ public class Assessment {
 
     @ManyToOne
     @JoinColumn(name = "course_id")
-    @JsonIgnore
     @ToString.Exclude
     @EqualsAndHashCode.Exclude
     private Course course;

@@ -52,7 +52,7 @@ function Footer() {
               {"</>"}
             </div>
             <span className="font-display text-xl font-extrabold tracking-tight text-white">
-              Code<span className="text-emerald-400">Learn</span>
+              Code<span className="text-emerald-400">Path</span>
             </span>
           </Link>
           <p className="max-w-sm text-sm leading-6 text-slate-400">
@@ -61,11 +61,11 @@ function Footer() {
           </p>
 
           <a
-            href="mailto:hello@codelearn.dev"
+            href="mailto:hello@codepath.dev"
             className="mt-5 inline-flex items-center gap-2 rounded-xl border border-white/10 bg-white/5 px-4 py-2 text-sm font-semibold text-white no-underline transition hover:border-emerald-400/40 hover:bg-white/10"
           >
             <Mail size={15} className="text-emerald-400" />
-            hello@codelearn.dev
+            hello@codepath.dev
           </a>
         </div>
 
@@ -94,7 +94,7 @@ function Footer() {
 
       <div className="relative mx-auto mt-12 flex max-w-7xl flex-col items-center justify-between gap-4 border-t border-white/10 pt-6 md:flex-row">
         <p className="m-0 text-sm text-slate-500">
-          © {new Date().getFullYear()} CodeLearn LMS. Phát triển cho bài tập lớn Công nghệ phần mềm.
+          © {new Date().getFullYear()} CodePath LMS. Phát triển cho bài tập lớn Công nghệ phần mềm.
         </p>
         <div className="flex items-center gap-3">
           <Link

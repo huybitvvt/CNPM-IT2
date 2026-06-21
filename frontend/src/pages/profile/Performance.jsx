@@ -156,9 +156,12 @@ const Performance = () => {
                 <tbody className="bg-white divide-y divide-gray-200">
                   {performanceData.map((data, index) => {
                     const scoreData = getScoreIcon(data.marks);
+                    const course = data.course;
+                    const courseName = course?.course_name || "Course unavailable";
+                    const courseId = course?.course_id;
                     return (
                       <tr
-                        key={index}
+                        key={data.id || courseId || index}
                         className="hover:bg-gray-50 transition-colors duration-200"
                       >
                         <td className="px-6 py-4 whitespace-nowrap">
@@ -166,16 +169,16 @@ const Performance = () => {
                             <div className="flex-shrink-0 h-12 w-12">
                               <div className="h-12 w-12 rounded-full bg-gradient-to-r from-indigo-400 to-purple-500 flex items-center justify-center">
                                 <span className="text-white font-bold text-sm">
-                                  {data.course.course_name.charAt(0)}
+                                  {courseName.charAt(0)}
                                 </span>
                               </div>
                             </div>
                             <div className="ml-4">
                               <div className="text-sm font-medium text-gray-900">
-                                {data.course.course_name}
+                                {courseName}
                               </div>
                               <div className="text-sm text-gray-500">
-                                Course ID: {data.course.course_id}
+                                Course ID: {courseId || "N/A"}
                               </div>
                             </div>
                           </div>
@@ -209,13 +212,13 @@ const Performance = () => {
                         </td>
                         
                         <td className="px-6 py-4 whitespace-nowrap text-center">
-                          {data.marks > 0 ? (
+                          {data.marks > 0 && courseId ? (
                             <button
-                              onClick={() => handleCertificateDownload(data.course.course_id)}
-                              disabled={downloadingCert === data.course.course_id}
+                              onClick={() => handleCertificateDownload(courseId)}
+                              disabled={downloadingCert === courseId}
                               className="inline-flex items-center px-4 py-2 bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-600 hover:to-purple-700 text-white text-sm font-medium rounded-lg transition-all duration-200 hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
                             >
-                              {downloadingCert === data.course.course_id ? (
+                              {downloadingCert === courseId ? (
                                 <>
                                   <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
                                   Processing...

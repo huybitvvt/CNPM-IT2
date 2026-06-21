@@ -35,6 +35,7 @@ function Navbar({ page }) {
 
   const handleLogOut = async () => {
     await authService.logout();
+    navigate("/login", { replace: true });
   };
 
   useEffect(() => {
@@ -82,7 +83,7 @@ function Navbar({ page }) {
             {"</>"}
           </div>
           <span className="font-display text-lg font-extrabold tracking-tight text-slate-900">
-            Code<span className="text-emerald-600">Learn</span>
+            Code<span className="text-emerald-600">Path</span>
           </span>
         </Link>
 

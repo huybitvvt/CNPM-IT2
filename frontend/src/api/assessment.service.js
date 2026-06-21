@@ -21,7 +21,18 @@ async function submitAssessment(userId, courseId, marks) {
   }
 }
 
+async function getAssessmentsByUserAndCourse(userId, courseId) {
+  try {
+    const { data } = await api.get(`/api/assessments/user/${userId}/course/${courseId}`);
+    return { success: true, data };
+  } catch (err) {
+    console.error("Error fetching course assessment:", err);
+    return { success: false, error: "Unable to fetch course assessment" };
+  }
+}
+
 export const assessmentService = {
   getQuestions,
   submitAssessment,
+  getAssessmentsByUserAndCourse,
 };

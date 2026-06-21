@@ -2,8 +2,10 @@ package com.lms.dev.config;
 
 import com.lms.dev.entity.Course;
 import com.lms.dev.entity.CourseLesson;
+import com.lms.dev.entity.Questions;
 import com.lms.dev.repository.CourseLessonRepository;
 import com.lms.dev.repository.CourseRepository;
+import com.lms.dev.repository.QuestionRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.annotation.Bean;
@@ -17,11 +19,13 @@ public class CourseCatalogInitializer {
 
     @Bean
     public CommandLineRunner createProgrammingCourseCatalog(CourseRepository courseRepository,
-                                                            CourseLessonRepository courseLessonRepository) {
+                                                            CourseLessonRepository courseLessonRepository,
+                                                            QuestionRepository questionRepository) {
         return args -> {
             if (courseRepository.count() > 0) {
                 backfillCourseMetadata(courseRepository);
                 seedLessonsForCatalog(courseRepository.findAll(), courseLessonRepository, courseRepository);
+                seedQuestionsForCatalog(courseRepository.findAll(), questionRepository);
                 log.info("Course catalog already has data, metadata backfill checked.");
                 return;
             }
@@ -95,6 +99,7 @@ public class CourseCatalogInitializer {
                     )
             ));
             seedLessonsForCatalog(courses, courseLessonRepository, courseRepository);
+            seedQuestionsForCatalog(courses, questionRepository);
             log.info("Sample programming course catalog created.");
         };
     }
@@ -335,6 +340,119 @@ public class CourseCatalogInitializer {
         return lesson;
     }
 
+    private void seedQuestionsForCatalog(List<Course> courses, QuestionRepository questionRepository) {
+        int createdCount = 0;
+
+        for (Course course : courses) {
+            if (course.getCourse_id() == null || !questionRepository.findByCourse(course).isEmpty()) {
+                continue;
+            }
+
+            List<QuestionSeed> questions = questionsForCourse(course);
+            if (questions.isEmpty()) {
+                continue;
+            }
+
+            List<Questions> entities = questions.stream()
+                    .map(seed -> createQuestion(course, seed))
+                    .toList();
+            questionRepository.saveAll(entities);
+            createdCount += entities.size();
+        }
+
+        if (createdCount > 0) {
+            log.info("Seeded {} quiz questions for course catalog.", createdCount);
+        }
+    }
+
+    private List<QuestionSeed> questionsForCourse(Course course) {
+        String name = course.getCourse_name() == null ? "" : course.getCourse_name().toLowerCase();
+        String category = course.getCategory() == null ? "" : course.getCategory().toLowerCase();
+
+        if (name.contains("react") || category.contains("frontend")) {
+            return List.of(
+                    question("ReactJS chủ yếu được dùng để làm gì?", "Xây dựng giao diện người dùng", "Quản trị database", "Cấu hình hệ điều hành", "Thiết kế mạng máy tính", "Xây dựng giao diện người dùng"),
+                    question("Hook nào thường dùng để quản lý state trong function component?", "useState", "useRouter", "useTable", "useQueryOnly", "useState"),
+                    question("React Router giúp ứng dụng React xử lý phần nào?", "Điều hướng giữa các route/trang", "Mã hóa mật khẩu", "Tạo database schema", "Biên dịch Java bytecode", "Điều hướng giữa các route/trang"),
+                    question("Props trong React được dùng để làm gì?", "Truyền dữ liệu từ component cha xuống component con", "Lưu dữ liệu trực tiếp vào PostgreSQL", "Chạy câu lệnh SQL", "Khởi động server Spring Boot", "Truyền dữ liệu từ component cha xuống component con"),
+                    question("Axios thường được dùng trong frontend để làm gì?", "Gọi HTTP API", "Tạo Docker image", "Chạy migration database", "Ký JWT token", "Gọi HTTP API")
+            );
+        }
+
+        if (name.contains("spring")) {
+            return List.of(
+                    question("Spring Boot giúp lập trình viên Java làm gì?", "Xây dựng ứng dụng backend nhanh với cấu hình tối giản", "Thiết kế ảnh vector", "Viết CSS tự động", "Quản lý thiết bị phần cứng", "Xây dựng ứng dụng backend nhanh với cấu hình tối giản"),
+                    question("Annotation nào thường dùng để tạo REST controller trong Spring Boot?", "@RestController", "@EntityOnly", "@ReactComponent", "@DatabaseTableOnly", "@RestController"),
+                    question("BCrypt thường được dùng để làm gì?", "Mã hóa/hash mật khẩu", "Nén file video", "Tạo QR thanh toán", "Render component React", "Mã hóa/hash mật khẩu"),
+                    question("JWT trong hệ thống xác thực thường chứa thông tin gì?", "Thông tin định danh và quyền của người dùng", "Mã nguồn frontend", "File PDF bài học", "Lịch sử commit Git", "Thông tin định danh và quyền của người dùng"),
+                    question("Spring Data JPA hỗ trợ thao tác chính với thành phần nào?", "Database/entity", "Canvas 3D", "Ảnh thumbnail", "DNS server", "Database/entity")
+            );
+        }
+
+        if (name.contains("java")) {
+            return List.of(
+                    question("JVM là viết tắt của cụm nào?", "Java Virtual Machine", "Java Visual Module", "Joint Version Manager", "Json View Model", "Java Virtual Machine"),
+                    question("Đặc trưng nào là một nguyên lý chính của OOP?", "Đóng gói", "Nén ảnh", "Định tuyến DNS", "Tạo QR", "Đóng gói"),
+                    question("Từ khóa nào dùng để tạo lớp kế thừa trong Java?", "extends", "inherits", "parent", "using", "extends"),
+                    question("Collection trong Java thường dùng để làm gì?", "Lưu trữ và thao tác tập hợp dữ liệu", "Chạy container", "Tạo khóa SSH", "Biên tập video", "Lưu trữ và thao tác tập hợp dữ liệu"),
+                    question("Exception trong Java biểu diễn điều gì?", "Lỗi hoặc tình huống bất thường khi chạy chương trình", "Một kiểu ảnh", "Một cổng mạng", "Một dependency frontend", "Lỗi hoặc tình huống bất thường khi chạy chương trình")
+            );
+        }
+
+        if (name.contains("sql") || category.contains("database")) {
+            return List.of(
+                    question("SQL được dùng chủ yếu để làm gì?", "Truy vấn và thao tác dữ liệu trong cơ sở dữ liệu quan hệ", "Thiết kế giao diện React", "Chạy Docker container", "Tạo JWT", "Truy vấn và thao tác dữ liệu trong cơ sở dữ liệu quan hệ"),
+                    question("Khóa chính (primary key) có vai trò gì?", "Định danh duy nhất mỗi bản ghi trong bảng", "Lưu ảnh đại diện", "Tự động gửi email", "Biên dịch source code", "Định danh duy nhất mỗi bản ghi trong bảng"),
+                    question("Câu lệnh SELECT dùng để làm gì?", "Lấy dữ liệu từ bảng", "Xóa database server", "Tạo component UI", "Mã hóa password", "Lấy dữ liệu từ bảng"),
+                    question("GROUP BY thường dùng khi nào?", "Khi cần nhóm dữ liệu để tính toán/tổng hợp", "Khi cần upload video", "Khi cần tạo route frontend", "Khi cần đăng nhập Google", "Khi cần nhóm dữ liệu để tính toán/tổng hợp"),
+                    question("Quan hệ một-nhiều trong database nghĩa là gì?", "Một bản ghi bảng A liên kết với nhiều bản ghi bảng B", "Mỗi bảng chỉ có một dòng", "Không bảng nào được liên kết", "Chỉ dùng được với file PDF", "Một bản ghi bảng A liên kết với nhiều bản ghi bảng B")
+            );
+        }
+
+        if (name.contains("python") || category.contains("data")) {
+            return List.of(
+                    question("Python nổi bật với ưu điểm nào?", "Cú pháp dễ đọc và dễ học", "Chỉ chạy được trên một hệ điều hành", "Không hỗ trợ thư viện", "Chỉ dùng để viết CSS", "Cú pháp dễ đọc và dễ học"),
+                    question("Dictionary trong Python lưu dữ liệu theo dạng nào?", "Key-value", "Hàng đợi video", "Bytecode Java", "CSS selector", "Key-value"),
+                    question("Vòng lặp while chạy khi nào?", "Khi điều kiện còn đúng", "Chỉ chạy đúng một lần", "Khi không có điều kiện", "Chỉ chạy trong SQL", "Khi điều kiện còn đúng"),
+                    question("Module trong Python giúp làm gì?", "Tổ chức và tái sử dụng code", "Tạo table PostgreSQL tự động", "Ký giao dịch ngân hàng", "Render JSX", "Tổ chức và tái sử dụng code"),
+                    question("Kiểu list trong Python thường dùng để làm gì?", "Lưu danh sách phần tử có thứ tự", "Lưu duy nhất một ký tự", "Tạo Docker network", "Xác thực JWT", "Lưu danh sách phần tử có thứ tự")
+            );
+        }
+
+        if (name.contains("devops") || name.contains("docker") || category.contains("devops")) {
+            return List.of(
+                    question("Docker container dùng để làm gì?", "Đóng gói và chạy ứng dụng trong môi trường cô lập", "Thiết kế logo", "Viết truy vấn SQL", "Tạo form React", "Đóng gói và chạy ứng dụng trong môi trường cô lập"),
+                    question("Docker image là gì?", "Bản mẫu để tạo container", "Một loại database", "Một dạng JWT", "Một component frontend", "Bản mẫu để tạo container"),
+                    question("CI/CD giúp nhóm phát triển điều gì?", "Tự động kiểm thử, build và triển khai phần mềm", "Tăng dung lượng RAM thủ công", "Vẽ sơ đồ UI", "Tạo mật khẩu ngẫu nhiên cho user", "Tự động kiểm thử, build và triển khai phần mềm"),
+                    question("GitHub Actions thường được dùng để làm gì?", "Tạo pipeline tự động trong repository GitHub", "Chỉnh sửa video YouTube", "Quản lý role trong database", "Tạo bảng HTML", "Tạo pipeline tự động trong repository GitHub"),
+                    question("Biến môi trường trong deploy thường dùng để lưu gì?", "Cấu hình như database URL, secret key, API key", "Nội dung bài thơ", "Kích thước màn hình người dùng", "Màu nền cố định", "Cấu hình như database URL, secret key, API key")
+            );
+        }
+
+        return List.of();
+    }
+
+    private Questions createQuestion(Course course, QuestionSeed seed) {
+        Questions question = new Questions();
+        question.setCourse(course);
+        question.setQuestion(seed.question());
+        question.setOption1(seed.option1());
+        question.setOption2(seed.option2());
+        question.setOption3(seed.option3());
+        question.setOption4(seed.option4());
+        question.setAnswer(seed.answer());
+        return question;
+    }
+
+    private QuestionSeed question(String question,
+                                  String option1,
+                                  String option2,
+                                  String option3,
+                                  String option4,
+                                  String answer) {
+        return new QuestionSeed(question, option1, option2, option3, option4, answer);
+    }
+
     private LessonSeed lesson(int order,
                               String title,
                               String description,
@@ -350,6 +468,14 @@ public class CourseCatalogInitializer {
                               String videoUrl,
                               String sourceName,
                               int durationMinutes) {
+    }
+
+    private record QuestionSeed(String question,
+                                String option1,
+                                String option2,
+                                String option3,
+                                String option4,
+                                String answer) {
     }
 
     private record CourseProfile(String name, String description, String videoUrl) {
